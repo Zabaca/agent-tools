@@ -1,0 +1,9 @@
+{
+  "SessionStart": [{
+    "matcher": "",
+    "hooks": [{
+      "type": "command",
+      "command": "cd ${CLAUDE_PLUGIN_ROOT}/packages/x-cli && bun install --frozen-lockfile 2>/dev/null || true"
+    }]
+  }]
+}

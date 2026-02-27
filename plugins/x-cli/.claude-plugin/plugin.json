@@ -1,0 +1,10 @@
+{
+  "name": "x-cli",
+  "version": "0.1.0",
+  "description": "Post tweets and manage X/Twitter interactions from Claude Code",
+  "author": { "name": "Zabaca" },
+  "keywords": ["twitter", "x", "tweet", "social-media"],
+  "skills": ["./skills/x-cli"],
+  "commands": ["./commands/tweet-doc.md", "./commands/tweet-git.md"],
+  "hooks": "./hooks.json"
+}

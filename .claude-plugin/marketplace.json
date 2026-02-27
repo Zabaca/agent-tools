@@ -1,0 +1,28 @@
+{
+  "name": "zabaca-agent-tools",
+  "owner": { "name": "Zabaca" },
+  "metadata": {
+    "description": "CLI tools for Claude Code — Twitter, Google Workspace, Image Generation",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "x-cli",
+      "description": "Post tweets and manage X/Twitter interactions from Claude Code",
+      "version": "0.1.0",
+      "source": "./x-cli"
+    },
+    {
+      "name": "google-cli",
+      "description": "Google Workspace CLI (Drive, Docs, Sheets) for Claude Code",
+      "version": "0.1.0",
+      "source": "./google-cli"
+    },
+    {
+      "name": "gemini-image",
+      "description": "Generate and edit images using Gemini 2.5 Flash from Claude Code",
+      "version": "0.1.0",
+      "source": "./gemini-image"
+    }
+  ]
+}

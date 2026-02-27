@@ -1,0 +1,56 @@
+{
+  "name": "@zabaca/gemini-image",
+  "version": "0.1.0",
+  "description": "CLI for Gemini image generation (Nano Banana)",
+  "type": "module",
+  "main": "dist/main.js",
+  "bin": {
+    "gemini-image": "dist/main.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Zabaca/gemini-image.git"
+  },
+  "scripts": {
+    "build": "bun build src/main.ts --outdir dist --target bun --packages external",
+    "dev": "bun run src/main.ts",
+    "test": "bun test",
+    "check": "tsc --noEmit && biome check .",
+    "check:fix": "tsc --noEmit && biome check --write .",
+    "prepublishOnly": "bun run build",
+    "release:patch": "bun run check && bun test && bun pm version patch && git push && git push --tags && bun publish",
+    "release:minor": "bun run check && bun test && bun pm version minor && git push && git push --tags && bun publish",
+    "release:major": "bun run check && bun test && bun pm version major && git push && git push --tags && bun publish",
+    "release:dry": "bun publish --dry-run"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "nest-commander": "^3.0.0",
+    "reflect-metadata": "^0.2.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "gemini",
+    "image-generation",
+    "nano-banana",
+    "ai",
+    "cli",
+    "google"
+  ],
+  "author": "Zabaca",
+  "license": "MIT"
+}

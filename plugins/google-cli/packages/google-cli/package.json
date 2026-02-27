@@ -1,0 +1,35 @@
+{
+  "name": "@research/google-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for Google Workspace integration (Drive, Docs, Sheets)",
+  "type": "module",
+  "main": "dist/main.js",
+  "bin": {
+    "google": "dist/main.js"
+  },
+  "scripts": {
+    "build": "bun build src/main.ts --outdir dist --target bun --packages external",
+    "dev": "bun run src/main.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "nest-commander": "^3.0.0",
+    "googleapis": "^144.0.0",
+    "reflect-metadata": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "google",
+    "drive",
+    "docs",
+    "sheets",
+    "cli"
+  ],
+  "license": "UNLICENSED"
+}

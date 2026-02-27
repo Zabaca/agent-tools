@@ -1,0 +1,11 @@
+[build]
+external = [
+  "@nestjs/platform-socket.io",
+  "nats",
+  "mqtt",
+  "amqplib",
+  "amqp-connection-manager",
+  "kafkajs",
+  "@grpc/grpc-js",
+  "@grpc/proto-loader"
+]
