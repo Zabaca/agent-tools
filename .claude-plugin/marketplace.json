@@ -23,6 +23,12 @@
       "description": "Generate and edit images using Gemini 2.5 Flash from Claude Code",
       "version": "0.1.0",
       "source": "./gemini-image"
+    },
+    {
+      "name": "pm-agent",
+      "description": "Conversational problem management. Capture, decorate, and organize problems with guided workflows.",
+      "version": "0.10.0",
+      "source": "./pm-agent"
     }
   ]
 }
