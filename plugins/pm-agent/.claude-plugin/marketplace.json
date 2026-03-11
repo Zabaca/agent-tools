@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "pm-agent",
+  "description": "Problem management plugins",
+  "owner": {
+    "name": "uptown"
+  },
+  "plugins": [
+    {
+      "name": "pm-agent",
+      "description": "Conversational problem management. Capture, decorate, and organize problems with guided workflows.",
+      "version": "0.10.0",
+      "source": "./"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "pm-agent",
+  "version": "0.10.0",
+  "description": "Conversational problem management. Capture problems, propose solutions, track execution through a pipeline.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["problem-management", "product-management", "state-machine"],
+  "commands": ["./commands/problem.md", "./commands/pm-init.md", "./commands/pm-status.md"],
+  "hooks": "./hooks.json"
+}

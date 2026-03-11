@@ -1,0 +1,10 @@
+#!/bin/sh
+# Pre-commit hook: validate plugin files when any are staged
+
+STAGED=$(git diff --cached --name-only)
+
+# Check if any plugin-related files are staged
+echo "$STAGED" | grep -qE '(plugin\.json|marketplace\.json|hooks\.json|commands/.*\.md)' || exit 0
+
+echo "Plugin files staged — running validator..."
+bun run src/validate.ts .
