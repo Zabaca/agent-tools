@@ -1,0 +1,9 @@
+{
+  "name": "claude-config-lint",
+  "version": "0.1.0",
+  "description": "Deterministic Zod-based schema validator for Claude Code config files (.mcp.json, settings.json, frontmatter, hooks, plugins).",
+  "author": { "name": "uptown" },
+  "keywords": ["validation", "lint", "schema", "config"],
+  "skills": ["./skills/lint/SKILL.md"],
+  "hooks": "./hooks.json"
+}
