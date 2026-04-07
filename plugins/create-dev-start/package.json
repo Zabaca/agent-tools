@@ -1,0 +1,6 @@
+{
+  "name": "create-dev-start",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Generates a project-specific dev-start skill for onboarding new developers"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "create-dev-start",
+  "version": "0.1.0",
+  "description": "Generates a project-specific dev-start skill that walks new developers through setting up a local dev environment.",
+  "author": { "name": "uptown" },
+  "keywords": ["dev-start", "onboarding", "setup", "scaffold"],
+  "skills": ["./skills/create-dev-start/SKILL.md"]
+}
