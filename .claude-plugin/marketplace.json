@@ -59,6 +59,12 @@
       "description": "Enforces a clean git status before Claude can stop. Uncommitted changes must be committed or ignored.",
       "version": "0.1.0",
       "source": "./plugins/git-clean-stop"
+    },
+    {
+      "name": "plugin-version-guard",
+      "description": "Scaffolds a git pre-commit hook that blocks commits when plugin code changes without a version bump.",
+      "version": "0.1.0",
+      "source": "./plugins/plugin-version-guard"
     }
   ]
 }

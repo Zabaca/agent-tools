@@ -1,0 +1,7 @@
+{
+  "name": "plugin-version-guard",
+  "version": "0.1.0",
+  "description": "Scaffolds a git pre-commit hook that blocks commits when plugin code changes without a version bump.",
+  "author": { "name": "Zabaca" },
+  "skills": ["./skills/plugin-version-guard"]
+}
