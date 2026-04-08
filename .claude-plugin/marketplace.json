@@ -53,6 +53,12 @@
       "description": "Spawn a long-lived builder teammate so the orchestrator keeps a clean context during multi-round design + implementation work.",
       "version": "0.1.0",
       "source": "./plugins/orchestrator"
+    },
+    {
+      "name": "git-clean-stop",
+      "description": "Enforces a clean git status before Claude can stop. Uncommitted changes must be committed or ignored.",
+      "version": "0.1.0",
+      "source": "./plugins/git-clean-stop"
     }
   ]
 }

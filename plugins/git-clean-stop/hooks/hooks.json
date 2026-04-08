@@ -1,0 +1,15 @@
+{
+  "Stop": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-git-clean.sh",
+          "timeout": 10,
+          "statusMessage": "Checking git status..."
+        }
+      ]
+    }
+  ]
+}

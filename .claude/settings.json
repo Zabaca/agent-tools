@@ -1,5 +1,6 @@
 {
   "enabledPlugins": {
-    "worktree-tickets@zabaca-agent-tools": true
+    "worktree-tickets@zabaca-agent-tools": true,
+    "git-clean-stop@zabaca-agent-tools": true
   }
 }
