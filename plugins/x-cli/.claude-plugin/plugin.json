@@ -4,7 +4,7 @@
   "description": "Post tweets and manage X/Twitter interactions from Claude Code",
   "author": { "name": "Zabaca" },
   "keywords": ["twitter", "x", "tweet", "social-media"],
-  "skills": ["./skills/x-cli"],
+  "skills": "./skills/",
   "commands": ["./commands/tweet-doc.md", "./commands/tweet-git.md"],
   "hooks": "./hooks.json"
 }

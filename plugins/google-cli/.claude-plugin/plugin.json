@@ -4,6 +4,6 @@
   "description": "Google Workspace CLI (Drive, Docs, Sheets) for Claude Code",
   "author": { "name": "Zabaca" },
   "keywords": ["google", "drive", "docs", "sheets", "workspace"],
-  "skills": ["./skills/google-cli"],
+  "skills": "./skills/",
   "hooks": "./hooks.json"
 }

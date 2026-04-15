@@ -4,6 +4,6 @@
   "description": "Generate and edit images using Gemini 2.5 Flash from Claude Code",
   "author": { "name": "Zabaca" },
   "keywords": ["gemini", "image", "ai", "generation"],
-  "skills": ["./skills/gemini-image"],
+  "skills": "./skills/",
   "hooks": "./hooks.json"
 }
