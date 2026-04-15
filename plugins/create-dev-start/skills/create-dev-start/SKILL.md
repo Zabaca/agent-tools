@@ -106,7 +106,9 @@ Gets a new developer from zero to a running local dev environment.
 [Migration and seed commands, local vs external DB]
 
 ### 5. Start Dev Server
-[Command and expected URL/port]
+[Commands to start long-running services using Bash with `run_in_background: true`.
+Include a health check (e.g., curl) after a short wait to verify the server is responding.
+Include port conflict handling (lsof + kill) in case a prior instance is still running.]
 
 ### 6. Verify Everything Works
 [Checklist of what to check + API smoke tests]
@@ -135,3 +137,5 @@ Gets a new developer from zero to a running local dev environment.
 - **Warn about destructive commands**: Flag any seed/reset commands that wipe data
 - **Include smoke tests**: Always add at least one curl or CLI check to verify the setup works
 - **Keep it maintainable**: Reference scripts from package.json rather than inlining complex commands
+- **Run long-running processes in background**: Dev servers, job runners, webhook listeners, and similar long-running processes must use `run_in_background: true` on Bash tool calls. Follow up with a health check (e.g., `sleep 5 && curl -sf -o /dev/null -w "%{http_code}" http://localhost:<port>`) to verify they started. Include port conflict handling (`lsof -ti:<port> | xargs kill`) before starting.
+- **Symlink .env for Prisma**: If the project uses Prisma, note that Prisma reads `.env` not `.env.local` — include `ln -sf .env.local .env` in the env setup step
