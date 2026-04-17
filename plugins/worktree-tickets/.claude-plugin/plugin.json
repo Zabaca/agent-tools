@@ -1,0 +1,11 @@
+{
+  "name": "worktree-tickets",
+  "version": "0.1.0",
+  "description": "Per-ticket git worktrees + parallel teammates. Spawn isolated ticket workers from a main session without blocking, with direnv-aware Bash env injection.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["worktree", "teams", "direnv", "hooks", "parallel"],
+  "commands": ["./commands/ticket-worker.md"],
+  "hooks": "./hooks.json"
+}

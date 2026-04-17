@@ -41,6 +41,12 @@
       "description": "Generates a project-specific dev-start skill for onboarding new developers",
       "version": "0.1.0",
       "source": "./plugins/create-dev-start"
+    },
+    {
+      "name": "worktree-tickets",
+      "description": "Per-ticket git worktrees + parallel teammates. Spawn isolated ticket workers without blocking the main session.",
+      "version": "0.1.0",
+      "source": "./plugins/worktree-tickets"
     }
   ]
 }
