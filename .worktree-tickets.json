@@ -1,0 +1,10 @@
+{
+  "base_branch": "main",
+  "team_name": "tickets-agent-tools",
+  "worktree_parent": "..",
+  "worktree_prefix": "stack-",
+  "branch_prefix": "ticket/",
+  "seed": [".env"],
+  "direnv_allow": true,
+  "post_create": []
+}
