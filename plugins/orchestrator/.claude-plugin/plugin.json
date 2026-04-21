@@ -1,0 +1,10 @@
+{
+  "name": "orchestrator",
+  "version": "0.1.0",
+  "description": "Spawn a long-lived `builder` teammate in the current worktree so the orchestrator keeps a clean context while the builder absorbs file reads, tool output, and verification runs.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["orchestrator", "team", "context", "builder"],
+  "skills": "./skills/"
+}

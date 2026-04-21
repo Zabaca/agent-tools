@@ -47,6 +47,12 @@
       "description": "Per-ticket git worktrees + parallel teammates. Spawn isolated ticket workers without blocking the main session.",
       "version": "0.1.0",
       "source": "./plugins/worktree-tickets"
+    },
+    {
+      "name": "orchestrator",
+      "description": "Spawn a long-lived builder teammate so the orchestrator keeps a clean context during multi-round design + implementation work.",
+      "version": "0.1.0",
+      "source": "./plugins/orchestrator"
     }
   ]
 }
