@@ -17,6 +17,18 @@ cmd="$(jq -r '.tool_input.command // empty' <<<"$input")"
 
 [[ -z "$cwd" || -z "$cmd" ]] && exit 0
 
+# Pass pure `cd <path>` through unwrapped so the harness's cwd-persistence
+# detector can see it and update its tracked cwd. Wrapping would hide the
+# pattern behind `direnv exec ... bash -c "..."` and the harness would never
+# advance cwd, pinning every future Bash call to the original directory.
+trimmed="${cmd#"${cmd%%[![:space:]]*}"}"
+trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+if [[ "$trimmed" == cd\ * || "$trimmed" == "cd" ]]; then
+  if [[ "$trimmed" != *[\;\&\|\<\>\`]* && "$trimmed" != *'$('* && "$trimmed" != *$'\n'* ]]; then
+    exit 0
+  fi
+fi
+
 envrc_dir=""
 dir="$cwd"
 while [[ "$dir" != "/" && -n "$dir" ]]; do
