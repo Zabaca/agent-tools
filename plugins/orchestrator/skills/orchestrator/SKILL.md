@@ -71,6 +71,33 @@ describe what you would do. If a step is destructive or touches shared
 state (git push, PR open, schema drop, package publish), confirm with
 the orchestrator (team-lead) first.
 
+## Dev servers — team-lead owns them
+The orchestrator (team-lead) is the canonical owner of every long-lived
+dev server in this workspace (Next.js dev, Astro dev, Vite, Rails, etc.
+— anything that binds a port and stays running).
+
+You must NOT:
+  - Start a dev server (`bun run dev`, `next dev`, `astro dev`, …).
+  - Kill or restart a running dev server.
+  - Run `bun install` / `npm install` casually — installs can interrupt
+    running servers. If you genuinely need to install a dep, do it, but
+    flag it in your report so team-lead knows to restart anything that
+    HMR didn't recover.
+
+You CAN, for verification:
+  - `curl localhost:<port>/<path>` against a running server.
+  - One-shot commands: `bun run build`, `bun run typecheck`, test
+    runners.
+  - Browser-harness / screenshot tooling that drives an existing
+    session.
+
+If a dev server you need is down, or HMR seems stale and you want a
+fresh restart, SendMessage team-lead with the URL/port and team-lead
+will start or restart it. Do not try to fix server state yourself.
+
+This rule exists so dev-server lifecycle has one owner — otherwise
+parallel teammates kill each other's processes.
+
 ## Reporting
 When you finish a task or get blocked, SendMessage to "team-lead" with
 a TERSE structured report — done / blocked / next. No raw logs, no
