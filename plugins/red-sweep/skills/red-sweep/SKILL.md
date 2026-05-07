@@ -11,16 +11,20 @@ Two-phase TDD-based issue discovery. The user defines the scope and focus; you w
 
 The red tests ARE the exploration tool. Don't speculate about issues — prove them with executable tests.
 
+**Both phases are sequential and disciplined.** Phases are separate (all discovery, then all fixes), but *within* each phase you work strictly one item at a time. No batching.
+
 ## Phase 1 — Red Sweep (discovery)
 
 1. **Get scope and focus from the user.** Scope = codebase, file, PR, or commit. Focus = what to look for (security, perf, correctness, race conditions, input validation, etc.).
 2. **Detect the existing test framework.** Look at the repo — vitest, jest, pytest, go test, rspec, whatever's there. Use it. Don't introduce a new framework.
 3. **Detect the issue-tracking standard.** GitHub issues if `gh` is available and the repo has a remote, otherwise default to a markdown report file (e.g. `RED-SWEEP.md`).
-4. **Scan broadly within the focus area.** For each plausible issue:
+4. **Scan sequentially within the focus area, ONE issue at a time.** Loop:
+   - Find the next plausible issue
    - Write ONE failing test that proves it exists
    - File the finding (issue or markdown entry) with reproduction steps and a link to the test
-   - Move on. **Do NOT fix anything during discovery.**
-5. Output at the end of Phase 1: a list of filed findings, each with its red test.
+   - Then — and only then — go look for the next issue
+5. **Do NOT fix anything during discovery.** Do NOT batch tests (no "let me write five tests at once"). One issue → one test → one filed finding → next issue.
+6. Output at the end of Phase 1: a list of filed findings, each with its red test.
 
 ## Phase 2 — Vertical Fix
 
@@ -57,6 +61,7 @@ Fix cycle:
 ## Anti-patterns
 
 - Guessing at bugs without writing a test that proves them.
+- Batching discovery: writing several red tests in one pass before filing any. Work one issue at a time.
 - Bundling multiple fixes "since they're all small."
 - Refactoring during the fix cycle — do that on a separate green pass.
 - Mocking internal modules to make a test pass — that proves nothing.
