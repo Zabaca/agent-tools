@@ -1,0 +1,10 @@
+{
+  "name": "red-sweep",
+  "version": "1.0.0",
+  "description": "TDD-based issue discovery — find bugs, security holes, and code quality issues by writing failing tests that prove problems exist.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["tdd", "audit", "security", "testing", "discovery"],
+  "skills": "./skills/"
+}

@@ -65,6 +65,12 @@
       "description": "Scaffolds a git pre-commit hook that blocks commits when plugin code changes without a version bump.",
       "version": "0.1.0",
       "source": "./plugins/plugin-version-guard"
+    },
+    {
+      "name": "red-sweep",
+      "description": "TDD-based issue discovery — find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
+      "version": "1.0.0",
+      "source": "./plugins/red-sweep"
     }
   ]
 }
