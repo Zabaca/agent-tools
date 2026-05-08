@@ -1,0 +1,10 @@
+{
+  "name": "session-analysis",
+  "version": "1.0.0",
+  "description": "Analyze Claude Code session transcripts to surface patterns, errors, anti-patterns, and skill improvement opportunities.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["sessions", "analysis", "patterns", "review", "telemetry"],
+  "skills": "./skills/"
+}
