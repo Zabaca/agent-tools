@@ -1,0 +1,10 @@
+{
+  "name": "matrix-agent",
+  "version": "1.0.0",
+  "description": "Dispatch parameterized prompts across a matrix of dimensions — fan-out audits, A/B experiments, parallel docs generation. Collects results and synthesizes cross-cutting insights.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["matrix", "fan-out", "parallel", "audit", "synthesis", "agents"],
+  "skills": "./skills/"
+}
