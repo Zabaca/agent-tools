@@ -4,7 +4,7 @@ Hook-enforced TDD issue discovery for Claude Code. Find bugs, security holes, an
 
 ## How it works
 
-A small state machine, enforced by Claude Code hooks (`scripts/state-machine.sh`):
+A small state machine, enforced by Claude Code hooks (`scripts/state-machine.ts`, run via Bun):
 
 | State | What's allowed |
 |-------|----------------|
@@ -36,6 +36,10 @@ The skill drops you into INIT. Confirm test framework, test patterns, and issue 
 plugins/red-sweep/
 ├── .claude-plugin/plugin.json
 ├── skills/red-sweep/SKILL.md       # INIT instructions + state docs + hooks frontmatter
-├── scripts/state-machine.sh        # Single hook entrypoint (PreToolUse/PostToolUse/Stop)
+├── scripts/state-machine.ts        # Single hook entrypoint (PreToolUse/PostToolUse/Stop), run with Bun
 └── README.md
 ```
+
+## Requirements
+
+- [Bun](https://bun.sh) on `PATH` — the hooks invoke `bun scripts/state-machine.ts <event>`.

@@ -8,29 +8,31 @@ hooks:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/scripts/state-machine.sh pre-write"
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts pre-write"
           timeout: 30
     - matcher: "Bash"
       hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/scripts/state-machine.sh pre-bash"
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts pre-bash"
           timeout: 30
   PostToolUse:
     - matcher: "Write|Edit"
       hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/scripts/state-machine.sh post-write"
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts post-write"
           timeout: 60
   Stop:
     - hooks:
         - type: command
-          command: "${CLAUDE_SKILL_DIR}/scripts/state-machine.sh stop"
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts stop"
           timeout: 10
 ---
 
 # Red Sweep
 
-TDD-based issue discovery, enforced by a state-machine hook. The agent's job is to do **INIT** with the user; from then on, hooks (`scripts/state-machine.sh`) enforce the discipline so the agent can't drift.
+TDD-based issue discovery, enforced by a state-machine hook. The agent's job is to do **INIT** with the user; from then on, hooks (`scripts/state-machine.ts`, run with `bun`) enforce the discipline so the agent can't drift.
+
+**Runtime requirement:** [Bun](https://bun.sh) on `PATH`. The hooks shell out to `bun scripts/state-machine.ts ...`.
 
 ## State machine
 
