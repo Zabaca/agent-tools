@@ -6,16 +6,19 @@
  * Reads tool-call JSON from stdin, looks up the project's state in
  * .red-sweep/state.json, and either allows the action (exit 0) or denies it
  * (deny JSON to stdout + exit 2).
+ *
+ * The decision logic lives in `handleHookEvent` and is pure (effects injected),
+ * so it's directly testable without touching stdin or the filesystem.
  */
 
 import { resolve, basename, isAbsolute, join } from "node:path";
 import { existsSync } from "node:fs";
 
-type Event = "pre-write" | "post-write" | "pre-bash" | "stop";
-type StateName = "INIT" | "DISCOVERING" | "FILING";
-type Tracker = "github" | "markdown";
+export type Event = "pre-write" | "post-write" | "pre-bash" | "stop";
+export type StateName = "INIT" | "DISCOVERING" | "FILING";
+export type Tracker = "github" | "markdown";
 
-interface RedSweepState {
+export interface RedSweepState {
   state: StateName;
   // config (set during INIT)
   test_cmd_full?: string;
@@ -36,7 +39,7 @@ interface RedSweepState {
   pending_test_file: string;
 }
 
-interface HookInput {
+export interface HookInput {
   tool_name?: string;
   tool_input?: {
     file_path?: string;
@@ -47,61 +50,23 @@ interface HookInput {
   [k: string]: unknown;
 }
 
-// ---------------------------------------------------------------------------
-// IO helpers
-// ---------------------------------------------------------------------------
+export type Decision =
+  | { kind: "allow"; newState?: RedSweepState }
+  | { kind: "deny"; reason: string; newState?: RedSweepState }
+  | { kind: "block-stop"; reason: string; newState?: RedSweepState };
 
-async function readStdin(): Promise<string> {
-  const chunks: Uint8Array[] = [];
-  const decoder = new TextDecoder();
-  for await (const chunk of Bun.stdin.stream()) chunks.push(chunk);
-  return chunks.map((c) => decoder.decode(c)).join("");
-}
-
-function deny(reason: string): never {
-  const out = {
-    hookSpecificOutput: {
-      hookEventName: "PreToolUse",
-      permissionDecision: "deny",
-      permissionDecisionReason: reason,
-    },
-  };
-  process.stdout.write(JSON.stringify(out));
-  process.exit(2);
-}
-
-function blockStop(reason: string): never {
-  process.stdout.write(JSON.stringify({ decision: "block", reason }));
-  process.exit(2);
-}
-
-function allow(): never {
-  process.exit(0);
+export interface Effects {
+  /** Returns the number of test markers currently in `file`, or 0 if missing. */
+  countTests: (file: string) => Promise<number>;
+  /** Returns the exit code of running the configured single-file test command. */
+  runSingleFileTests: (file: string) => Promise<number>;
 }
 
 // ---------------------------------------------------------------------------
-// State persistence
+// Domain helpers (pure)
 // ---------------------------------------------------------------------------
 
-async function readState(stateFile: string): Promise<RedSweepState | null> {
-  if (!existsSync(stateFile)) return null;
-  try {
-    const text = await Bun.file(stateFile).text();
-    return JSON.parse(text) as RedSweepState;
-  } catch {
-    return null;
-  }
-}
-
-async function writeState(stateFile: string, state: RedSweepState): Promise<void> {
-  await Bun.write(stateFile, JSON.stringify(state, null, 2));
-}
-
-// ---------------------------------------------------------------------------
-// Domain helpers
-// ---------------------------------------------------------------------------
-
-function globToRegex(glob: string): RegExp {
+export function globToRegex(glob: string): RegExp {
   let re = "^";
   for (const ch of glob) {
     if (ch === "*") re += "[^/]*";
@@ -112,7 +77,7 @@ function globToRegex(glob: string): RegExp {
   return new RegExp(re + "$");
 }
 
-function isTestFile(path: string, state: RedSweepState): boolean {
+export function isTestFile(path: string, state: RedSweepState): boolean {
   if (!state.test_pattern) return false;
   const base = basename(path);
   if (!globToRegex(state.test_pattern).test(base)) return false;
@@ -121,26 +86,6 @@ function isTestFile(path: string, state: RedSweepState): boolean {
     return path.includes(`/${dir}/`) || path.startsWith(`${dir}/`);
   }
   return true;
-}
-
-async function countTests(file: string, state: RedSweepState): Promise<number> {
-  if (!existsSync(file)) return 0;
-  const markerSrc = state.test_marker_regex ?? "^\\s*(it|test)\\s*\\(";
-  const re = new RegExp(markerSrc, "gm");
-  const text = await Bun.file(file).text();
-  return (text.match(re) ?? []).length;
-}
-
-async function runSingleFileTests(file: string, state: RedSweepState, cwd: string): Promise<number> {
-  // Returns the test command's exit code. If unconfigured, returns 0 (don't block).
-  if (!state.test_cmd_single) return 0;
-  const cmd = state.test_cmd_single.replaceAll("{file}", file);
-  const proc = Bun.spawn(["bash", "-c", cmd], {
-    cwd,
-    stdout: "ignore",
-    stderr: "ignore",
-  });
-  return await proc.exited;
 }
 
 const BLOCKED_BASH = [
@@ -154,146 +99,212 @@ const BLOCKED_BASH = [
   /(^|\s|;|&|\|)rm\s+/,
 ];
 
-function isBlockedBash(cmd: string): boolean {
+export function isBlockedBash(cmd: string): boolean {
   return BLOCKED_BASH.some((re) => re.test(cmd));
 }
 
-function isFilingBash(cmd: string): boolean {
+export function isFilingBash(cmd: string): boolean {
   return /\bgh\s+issue\s+create\b/.test(cmd);
 }
 
 // ---------------------------------------------------------------------------
-// Event handlers
+// Pure decision function
 // ---------------------------------------------------------------------------
 
-async function handleStop(state: RedSweepState, stateFile: string): Promise<never> {
-  const limit = state.loop_limit ?? 10;
-  if (state.finding_count > 0) allow();
-  if (state.stop_attempts >= limit) allow();
-
-  state.stop_attempts += 1;
-  await writeState(stateFile, state);
-  blockStop(
-    `No findings filed yet. Keep scanning the focus area for issues. (attempt ${state.stop_attempts} of ${limit})`,
-  );
-}
-
-async function handlePreWrite(
+export async function handleHookEvent(
+  event: Event,
   input: HookInput,
   state: RedSweepState,
-  stateFile: string,
-): Promise<never> {
-  const filePath = input.tool_input?.file_path;
-  if (!filePath) allow();
+  effects: Effects,
+): Promise<Decision> {
+  // INIT — no enforcement.
+  if (state.state === "INIT") return { kind: "allow" };
 
-  if (state.state === "DISCOVERING") {
-    if (!isTestFile(filePath, state)) {
-      deny(
-        `red-sweep DISCOVERING: only test files may be edited. '${filePath}' is not a test file (pattern=${state.test_pattern}, dir=${state.test_dir}). Source fixes happen in Phase 2.`,
-      );
+  if (event === "stop") {
+    const limit = state.loop_limit ?? 10;
+    if (state.finding_count > 0) return { kind: "allow" };
+    if (state.stop_attempts >= limit) return { kind: "allow" };
+    const newState: RedSweepState = { ...state, stop_attempts: state.stop_attempts + 1 };
+    return {
+      kind: "block-stop",
+      reason: `No findings filed yet. Keep scanning the focus area for issues. (attempt ${newState.stop_attempts} of ${limit})`,
+      newState,
+    };
+  }
+
+  if (event === "pre-write") {
+    const filePath = input.tool_input?.file_path;
+    if (!filePath) return { kind: "allow" };
+
+    if (state.state === "DISCOVERING") {
+      if (!isTestFile(filePath, state)) {
+        return {
+          kind: "deny",
+          reason: `red-sweep DISCOVERING: only test files may be edited. '${filePath}' is not a test file (pattern=${state.test_pattern}, dir=${state.test_dir}). Source fixes happen in Phase 2.`,
+        };
+      }
+      if (state.current_test && state.current_test !== filePath) {
+        return {
+          kind: "deny",
+          reason: `red-sweep: a red test already exists at '${state.current_test}' that hasn't been filed. File the finding (gh issue create or append to the findings doc) before writing another test.`,
+        };
+      }
+      const baseline = await effects.countTests(filePath);
+      return {
+        kind: "allow",
+        newState: { ...state, baseline_test_count: baseline, pending_test_file: filePath },
+      };
     }
-    if (state.current_test && state.current_test !== filePath) {
-      deny(
-        `red-sweep: a red test already exists at '${state.current_test}' that hasn't been filed. File the finding (gh issue create or append to the findings doc) before writing another test.`,
-      );
+
+    if (state.state === "FILING") {
+      if (state.tracker === "markdown" && state.findings_file) {
+        const findings = state.findings_file;
+        const cwd = input.cwd ?? process.cwd();
+        const absFindings = isAbsolute(findings) ? findings : join(cwd, findings);
+        if (filePath === findings || filePath === absFindings) return { kind: "allow" };
+      }
+      return {
+        kind: "deny",
+        reason: `red-sweep FILING: only the findings file (${state.findings_file ?? "<unset>"}) may be edited right now. File the current red test, then return to discovery.`,
+      };
     }
-    state.baseline_test_count = await countTests(filePath, state);
-    state.pending_test_file = filePath;
-    await writeState(stateFile, state);
-    allow();
+
+    return { kind: "allow" };
   }
 
-  if (state.state === "FILING") {
-    if (state.tracker === "markdown" && state.findings_file) {
-      const findings = state.findings_file;
-      const cwd = input.cwd ?? process.cwd();
-      const absFindings = isAbsolute(findings) ? findings : join(cwd, findings);
-      if (filePath === findings || filePath === absFindings) allow();
+  if (event === "post-write") {
+    const filePath = input.tool_input?.file_path;
+    if (!filePath) return { kind: "allow" };
+    if (state.state !== "DISCOVERING") return { kind: "allow" };
+    if (!isTestFile(filePath, state)) return { kind: "allow" };
+
+    const newCount = await effects.countTests(filePath);
+    const delta = newCount - (state.baseline_test_count ?? 0);
+
+    if (delta === 0) {
+      return { kind: "allow" }; // edits to helpers / setup are fine
     }
-    deny(
-      `red-sweep FILING: only the findings file (${state.findings_file ?? "<unset>"}) may be edited right now. File the current red test, then return to discovery.`,
-    );
-  }
-
-  allow();
-}
-
-async function handlePostWrite(
-  input: HookInput,
-  state: RedSweepState,
-  stateFile: string,
-  cwd: string,
-): Promise<never> {
-  const filePath = input.tool_input?.file_path;
-  if (!filePath) allow();
-  if (state.state !== "DISCOVERING") allow();
-  if (!isTestFile(filePath, state)) allow();
-
-  const newCount = await countTests(filePath, state);
-  const delta = newCount - (state.baseline_test_count ?? 0);
-
-  if (delta === 0) {
-    deny(
-      `red-sweep: write to '${filePath}' did not add a new test (baseline=${state.baseline_test_count}, after=${newCount}). The red test is the exploration tool — add exactly one failing test.`,
-    );
-  }
-  if (delta > 1) {
-    deny(
-      `red-sweep: write to '${filePath}' added ${delta} tests. Only ONE failing test at a time. Remove the extras.`,
-    );
-  }
-
-  const exitCode = await runSingleFileTests(filePath, state, cwd);
-  if (exitCode === 0) {
-    deny(
-      `red-sweep: tests in '${filePath}' pass. A red sweep test must FAIL — it has to prove an issue exists. Rewrite or remove it.`,
-    );
-  }
-
-  state.current_test = filePath;
-  state.state = "FILING";
-  await writeState(stateFile, state);
-  allow();
-}
-
-async function handlePreBash(
-  input: HookInput,
-  state: RedSweepState,
-  stateFile: string,
-): Promise<never> {
-  const cmd = input.tool_input?.command ?? "";
-
-  if (state.state === "DISCOVERING") {
-    if (isBlockedBash(cmd)) {
-      deny(
-        `red-sweep DISCOVERING: '${cmd}' is blocked. No commits, resets, or destructive ops during discovery.`,
-      );
+    if (delta > 1) {
+      return {
+        kind: "deny",
+        reason: `red-sweep: write to '${filePath}' added ${delta} tests. Only ONE failing test at a time. Remove the extras.`,
+      };
     }
-    allow();
+
+    const exitCode = await effects.runSingleFileTests(filePath);
+    if (exitCode === 0) {
+      return {
+        kind: "deny",
+        reason: `red-sweep: tests in '${filePath}' pass. A red sweep test must FAIL — it has to prove an issue exists. Rewrite or remove it.`,
+      };
+    }
+
+    return {
+      kind: "allow",
+      newState: { ...state, current_test: filePath, state: "FILING" },
+    };
   }
 
-  if (state.state === "FILING") {
-    if (isFilingBash(cmd)) {
-      state.finding_count += 1;
-      state.state = "DISCOVERING";
-      state.current_test = "";
-      await writeState(stateFile, state);
-      allow();
+  if (event === "pre-bash") {
+    const cmd = input.tool_input?.command ?? "";
+
+    if (state.state === "DISCOVERING") {
+      if (isBlockedBash(cmd)) {
+        return {
+          kind: "deny",
+          reason: `red-sweep DISCOVERING: '${cmd}' is blocked. No commits, resets, or destructive ops during discovery.`,
+        };
+      }
+      return { kind: "allow" };
     }
-    if (isBlockedBash(cmd)) {
-      deny(
-        `red-sweep FILING: '${cmd}' is blocked. File the current finding via 'gh issue create' or by editing the findings doc.`,
-      );
+
+    if (state.state === "FILING") {
+      if (isFilingBash(cmd)) {
+        return {
+          kind: "allow",
+          newState: {
+            ...state,
+            finding_count: state.finding_count + 1,
+            state: "DISCOVERING",
+            current_test: "",
+          },
+        };
+      }
+      if (isBlockedBash(cmd)) {
+        return {
+          kind: "deny",
+          reason: `red-sweep FILING: '${cmd}' is blocked. File the current finding via 'gh issue create' or by editing the findings doc.`,
+        };
+      }
+      return { kind: "allow" };
     }
-    allow();
   }
 
-  allow();
+  return { kind: "allow" };
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Production effects (filesystem + Bun.spawn)
 // ---------------------------------------------------------------------------
+
+export async function readState(stateFile: string): Promise<RedSweepState | null> {
+  if (!existsSync(stateFile)) return null;
+  try {
+    const text = await Bun.file(stateFile).text();
+    return JSON.parse(text) as RedSweepState;
+  } catch {
+    return null;
+  }
+}
+
+export async function writeState(stateFile: string, state: RedSweepState): Promise<void> {
+  await Bun.write(stateFile, JSON.stringify(state, null, 2));
+}
+
+export function makeEffects(state: RedSweepState, cwd: string): Effects {
+  return {
+    async countTests(file: string): Promise<number> {
+      if (!existsSync(file)) return 0;
+      const markerSrc = state.test_marker_regex ?? "^\\s*(it|test)\\s*\\(";
+      const re = new RegExp(markerSrc, "gm");
+      const text = await Bun.file(file).text();
+      return (text.match(re) ?? []).length;
+    },
+    async runSingleFileTests(file: string): Promise<number> {
+      if (!state.test_cmd_single) return 0;
+      const cmd = state.test_cmd_single.replaceAll("{file}", file);
+      const proc = Bun.spawn(["bash", "-c", cmd], { cwd, stdout: "ignore", stderr: "ignore" });
+      return await proc.exited;
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Hook entry point
+// ---------------------------------------------------------------------------
+
+async function readStdin(): Promise<string> {
+  const chunks: Uint8Array[] = [];
+  const decoder = new TextDecoder();
+  for await (const chunk of Bun.stdin.stream()) chunks.push(chunk);
+  return chunks.map((c) => decoder.decode(c)).join("");
+}
+
+function emitDeny(reason: string): never {
+  process.stdout.write(JSON.stringify({
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: reason,
+    },
+  }));
+  process.exit(2);
+}
+
+function emitBlockStop(reason: string): never {
+  process.stdout.write(JSON.stringify({ decision: "block", reason }));
+  process.exit(2);
+}
 
 async function main(): Promise<void> {
   const event = process.argv[2] as Event | undefined;
@@ -308,27 +319,27 @@ async function main(): Promise<void> {
   const stateFile = resolve(cwd, ".red-sweep/state.json");
 
   const state = await readState(stateFile);
-  // INIT (no state file) → permissive: agent is still configuring.
-  if (!state) allow();
-  if (state.state === "INIT") allow();
+  if (!state) process.exit(0); // INIT (no state file) — agent is still configuring.
 
-  switch (event) {
-    case "stop":
-      return handleStop(state, stateFile);
-    case "pre-write":
-      return handlePreWrite(input, state, stateFile);
-    case "post-write":
-      return handlePostWrite(input, state, stateFile, cwd);
-    case "pre-bash":
-      return handlePreBash(input, state, stateFile);
-    default:
-      process.stderr.write(`state-machine.ts: unknown event '${event}'\n`);
+  const decision = await handleHookEvent(event, input, state, makeEffects(state, cwd));
+
+  if (decision.newState) await writeState(stateFile, decision.newState);
+
+  switch (decision.kind) {
+    case "allow":
       process.exit(0);
+    case "deny":
+      emitDeny(decision.reason);
+    case "block-stop":
+      emitBlockStop(decision.reason);
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`state-machine.ts error: ${err?.message ?? err}\n`);
-  // Fail open — never wedge the user.
-  process.exit(0);
-});
+// Only run main() when invoked as a script, not when imported by tests.
+if (import.meta.main) {
+  main().catch((err) => {
+    process.stderr.write(`state-machine.ts error: ${err?.message ?? err}\n`);
+    // Fail open — never wedge the user.
+    process.exit(0);
+  });
+}
