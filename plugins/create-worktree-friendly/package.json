@@ -1,0 +1,6 @@
+{
+  "name": "create-worktree-friendly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bootstrap a repo for parallel-safe git-worktree development: per-worktree DB, per-worktree dev/e2e port, Playwright e2e scaffold, and a project-local worktree skill."
+}
