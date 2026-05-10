@@ -43,6 +43,12 @@
       "source": "./plugins/create-dev-start"
     },
     {
+      "name": "create-worktree-friendly",
+      "description": "Bootstrap a repo for parallel-safe git-worktree development: per-worktree DB, per-worktree dev/e2e port, Playwright e2e scaffold, and a project-local worktree skill.",
+      "version": "0.1.0",
+      "source": "./plugins/create-worktree-friendly"
+    },
+    {
       "name": "worktree-tickets",
       "description": "Per-ticket git worktrees + parallel teammates. Spawn isolated ticket workers without blocking the main session.",
       "version": "0.1.0",
