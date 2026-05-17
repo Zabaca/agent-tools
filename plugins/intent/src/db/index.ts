@@ -18,6 +18,10 @@ const isNew = !existsSync(dbPath);
 
 export const client = createClient({ url });
 
+// Enable WAL mode for concurrent reads while pipeline ingestion holds a read lock.
+// Safe to set every time — SQLite ignores if already WAL.
+await client.execute("PRAGMA journal_mode=WAL");
+
 // Auto-migrate on first use. Idempotent — uses CREATE IF NOT EXISTS.
 if (isNew) {
   await client.execute(`CREATE TABLE IF NOT EXISTS intents (
