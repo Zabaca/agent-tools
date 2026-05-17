@@ -1,0 +1,11 @@
+{
+  "name": "intent",
+  "version": "0.1.0",
+  "description": "Capture session intent, detect drift, log transitions. A focus layer on top of Claude Code sessions.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["focus", "intent", "session-management", "anti-drift"],
+  "commands": ["./commands/intent.md"],
+  "hooks": "./hooks.json"
+}

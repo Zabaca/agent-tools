@@ -77,6 +77,12 @@
       "description": "TDD-based issue discovery — find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
       "version": "1.0.0",
       "source": "./plugins/red-sweep"
+    },
+    {
+      "name": "intent",
+      "description": "Capture session intent, detect drift, log transitions. A focus layer on top of Claude Code sessions.",
+      "version": "0.1.0",
+      "source": "./plugins/intent"
     }
   ]
 }
