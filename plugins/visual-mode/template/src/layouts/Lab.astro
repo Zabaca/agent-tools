@@ -1,0 +1,61 @@
+---
+// Bare full-bleed layout for out-of-bounds visual experiments.
+// No pane shell, no prose typography — pages own 100% of their styling.
+import "@/styles/global.css";
+
+interface Props {
+  title?: string;
+  theme?: "light" | "dark";
+}
+const { title = "Lab", theme = "light" } = Astro.props;
+
+// Auto-discover every lab page so the switcher needs no maintenance.
+const labPages = import.meta.glob("../pages/lp/*.astro", { eager: true });
+const variants = [
+  { href: "/", label: "⌂ Panes" },
+  ...Object.keys(labPages)
+    .map((p) => p.replace("../pages", "").replace(/(\/index)?\.astro$/, "") || "/lp")
+    .map((href) => ({
+      href,
+      label:
+        href === "/lp"
+          ? "Lab"
+          : (href.split("/").pop() ?? "").replace(/[-_]/g, " "),
+    }))
+    .sort((a, b) => a.href.localeCompare(b.href)),
+];
+const current = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<!doctype html>
+<html lang="en" class:list={[theme === "dark" && "dark"]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen antialiased">
+    <slot />
+
+    <!-- floating switcher -->
+    <nav
+      class="fixed bottom-4 left-1/2 z-50 flex max-w-[92vw] -translate-x-1/2 items-center gap-1 overflow-x-auto rounded-full border border-black/10 bg-white/80 px-2 py-1.5 shadow-xl backdrop-blur-md"
+    >
+      {
+        variants.map((v) => (
+          <a
+            href={v.href}
+            class:list={[
+              "rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap capitalize transition",
+              current === v.href
+                ? "bg-black text-white"
+                : "text-black/60 hover:bg-black/5",
+            ]}
+          >
+            {v.label}
+          </a>
+        ))
+      }
+    </nav>
+  </body>
+</html>

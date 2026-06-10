@@ -1,0 +1,8 @@
+{
+  "name": "visual-mode",
+  "version": "0.1.0",
+  "description": "Visual output surface for agents — scaffolds a local astro app (.visual-mode/) rendering responses as browsable MDX panes plus full-bleed lab pages, with a /visual-mode skill that starts the dev server and teaches the conventions.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["visualization", "astro", "panes", "mdx", "dev-server"],
+  "skills": "./skills/"
+}

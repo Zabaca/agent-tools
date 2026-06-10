@@ -1,0 +1,49 @@
+---
+title: Welcome to visual mode
+---
+
+# 👋 Visual mode is live
+
+This app is your agent's visual output surface. Two ways to render:
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 not-prose my-6">
+  <div className="rounded-xl border border-slate-200 p-5">
+    <div className="text-2xl">📑</div>
+    <div className="font-semibold mt-2">Panes (structured)</div>
+    <p className="text-sm text-slate-500 mt-1 mb-0">
+      MDX files in <code>src/content/panes/YYYY-MM-DD-topic/NN-name.mdx</code>.
+      Markdown + components, grouped by session in the left rail.
+    </p>
+  </div>
+  <a href="/lp" className="block rounded-xl border border-slate-200 p-5 hover:border-indigo-400 hover:shadow-md transition">
+    <div className="text-2xl">🧪</div>
+    <div className="font-semibold mt-2">Lab (out of bounds) →</div>
+    <p className="text-sm text-slate-500 mt-1 mb-0">
+      Full-bleed <code>.astro</code> pages in <code>src/pages/lp/</code> that own
+      100% of their styling. No shell, no prose constraints.
+    </p>
+  </a>
+</div>
+
+## Components available with no imports
+
+<Callout type="info" title="Callout">
+Types: <code>info</code>, <code>success</code>, <code>warning</code>. Plus
+<code>Card*</code>, <code>Badge</code>, <code>Separator</code>, <code>Chart</code>,
+<code>Mermaid</code> — registry lives in <code>src/pages/[...slug].astro</code>.
+</Callout>
+
+<Mermaid chart={`flowchart LR
+  A["agent writes .mdx"] --> B["pane appears here"]
+  A2["agent writes .astro in /lp"] --> C["full-bleed page in the Lab"]
+`} />
+
+| Element | Works? |
+| --- | --- |
+| Markdown tables | ✅ |
+| Tailwind v4 via `className` | ✅ |
+| Mermaid diagrams | ✅ |
+| Recharts via `Chart` | ✅ |
+
+This pane is part of the template — feel free to delete the
+`0000-00-00-welcome` folder once you're oriented.
