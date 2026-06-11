@@ -1,11 +1,19 @@
 {
   "name": "zabaca-agent-tools",
-  "owner": { "name": "Zabaca" },
+  "owner": {
+    "name": "Zabaca"
+  },
   "metadata": {
-    "description": "CLI tools for Claude Code — Twitter, Google Workspace, Image Generation",
+    "description": "CLI tools for Claude Code \u2014 Twitter, Google Workspace, Image Generation",
     "pluginRoot": "./plugins"
   },
   "plugins": [
+    {
+      "name": "visual-mode",
+      "description": "Visual output surface for agents \u2014 scaffolds a local astro app (.visual-mode/) rendering responses as browsable MDX panes plus full-bleed lab pages, with a /visual-mode skill that starts the dev server and teaches the conventions.",
+      "version": "0.1.0",
+      "source": "./plugins/visual-mode"
+    },
     {
       "name": "x-cli",
       "description": "Post tweets and manage X/Twitter interactions from Claude Code",
@@ -23,12 +31,6 @@
       "description": "Generate and edit images using Gemini 2.5 Flash from Claude Code",
       "version": "0.1.0",
       "source": "./plugins/gemini-image"
-    },
-    {
-      "name": "pm-agent",
-      "description": "Conversational problem management. Capture, decorate, and organize problems with guided workflows.",
-      "version": "0.10.0",
-      "source": "./plugins/pm-agent"
     },
     {
       "name": "claude-config-lint",
@@ -74,7 +76,7 @@
     },
     {
       "name": "red-sweep",
-      "description": "TDD-based issue discovery — find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
+      "description": "TDD-based issue discovery \u2014 find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
       "version": "1.0.0",
       "source": "./plugins/red-sweep"
     },

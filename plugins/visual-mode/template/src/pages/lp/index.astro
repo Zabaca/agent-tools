@@ -1,0 +1,49 @@
+---
+import Lab from "@/layouts/Lab.astro";
+
+// Auto-list every lab page in this directory.
+const pages = Object.keys(import.meta.glob("./*.astro"))
+  .filter((p) => !p.includes("index"))
+  .map((p) => {
+    const slug = p.replace("./", "").replace(".astro", "");
+    return { href: `/lp/${slug}`, name: slug.replace(/[-_]/g, " ") };
+  })
+  .sort((a, b) => a.href.localeCompare(b.href));
+---
+
+<Lab title="Lab — full-bleed pages">
+  <main class="mx-auto max-w-3xl px-6 py-20 text-stone-900">
+    <p class="text-xs font-bold tracking-[0.25em] text-stone-400 uppercase">
+      /lp — the escape hatch
+    </p>
+    <h1 class="mt-3 text-5xl font-extrabold tracking-tight">Lab</h1>
+    <p class="mt-4 max-w-xl text-lg text-stone-500">
+      Full-bleed <code class="rounded bg-stone-100 px-1.5 py-0.5 text-base">.astro</code>
+      pages that escape the pane shell entirely — each page owns its typography,
+      color, and layout. Agents: drop new pages in
+      <code class="rounded bg-stone-100 px-1.5 py-0.5 text-base">src/pages/lp/</code>
+      using the <code class="rounded bg-stone-100 px-1.5 py-0.5 text-base">Lab</code>
+      layout; they're auto-listed here and in the floating switcher.
+    </p>
+
+    {
+      pages.length === 0 ? (
+        <div class="mt-12 rounded-2xl border-2 border-dashed border-stone-300 p-10 text-center text-stone-400">
+          No lab pages yet. The first one you create will appear here.
+        </div>
+      ) : (
+        <div class="mt-12 grid gap-5 sm:grid-cols-2">
+          {pages.map((s) => (
+            <a
+              href={s.href}
+              class="group rounded-2xl border border-stone-200 p-6 capitalize transition hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              <h2 class="text-xl font-bold group-hover:underline">{s.name}</h2>
+              <p class="mt-1 text-sm text-stone-400">{s.href}</p>
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </main>
+</Lab>
