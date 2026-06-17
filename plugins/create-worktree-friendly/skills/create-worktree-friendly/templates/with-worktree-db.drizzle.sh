@@ -33,12 +33,28 @@ else
   DB="${DB_NAME_BASE}_${SUFFIX}"
 fi
 
+# Swap the database (the last path segment) of a Postgres URL, preserving
+# user / password / host / port and any ?query string.
+#
+# We deliberately do NOT do a blanket `${url//\/$old/\/$new}` replace: when
+# the DB name also appears as the username (e.g. user=app, db=app) that
+# pattern matches the `//` in `postgresql://app...` and corrupts the
+# username. Splitting on the final `/` only touches the DB segment.
+swap_db() {
+  local url="$1" newdb="$2" base query
+  case "$url" in
+    *\?*) base="${url%%\?*}"; query="?${url#*\?}";;
+    *)    base="$url";        query="";;
+  esac
+  printf '%s/%s%s' "${base%/*}" "$newdb" "$query"
+}
+
 ORIG_URL=$(grep -E "^DATABASE_URL=" {{ENV_TEST_FILE}} 2>/dev/null | head -1 | cut -d= -f2-)
 if [ -z "${ORIG_URL:-}" ]; then
   echo "with-worktree-db: DATABASE_URL not found in {{ENV_TEST_FILE}}" >&2
   exit 1
 fi
-NEW_URL="${ORIG_URL//\/${DB_NAME_BASE}/\/${DB}}"
+NEW_URL="$(swap_db "$ORIG_URL" "$DB")"
 export DATABASE_URL="$NEW_URL"
 
 # Probe + auto-create. Drizzle ships no equivalent of `prisma db execute`,
@@ -47,7 +63,7 @@ export DATABASE_URL="$NEW_URL"
 JUST_CREATED=0
 if ! psql "$NEW_URL" -c "SELECT 1" >/dev/null 2>&1; then
   echo "[worktree-db] $DB not reachable — attempting to create..."
-  ADMIN_URL="${NEW_URL//\/${DB}/\/postgres}"
+  ADMIN_URL="$(swap_db "$NEW_URL" postgres)"
   if ! psql "$ADMIN_URL" -c "CREATE DATABASE \"$DB\"" >/dev/null 2>&1; then
     echo "[worktree-db] failed to create $DB. Is psql installed and Postgres up?" >&2
     exit 1
