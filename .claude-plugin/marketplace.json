@@ -85,6 +85,12 @@
       "description": "Capture session intent, detect drift, log transitions. A focus layer on top of Claude Code sessions.",
       "version": "0.1.0",
       "source": "./plugins/intent"
+    },
+    {
+      "name": "machine-first-prototype",
+      "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways \u2014 bare functional, designed, and a state explorer covering every reachable state.",
+      "version": "0.1.0",
+      "source": "./plugins/machine-first-prototype"
     }
   ]
 }

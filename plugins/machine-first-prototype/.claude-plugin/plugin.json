@@ -1,0 +1,8 @@
+{
+  "name": "machine-first-prototype",
+  "version": "0.1.0",
+  "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways — bare functional, designed, and a state explorer covering every reachable state.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["xstate", "state-machines", "prototype", "screenshots", "ui-states"],
+  "skills": "./skills/"
+}
