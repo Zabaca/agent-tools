@@ -1,67 +1,130 @@
 ---
 name: red-sweep
-description: TDD-based issue discovery. Use when user wants to find bugs, security holes, or code quality issues by writing failing tests that prove problems exist. Triggers: "red sweep", "find issues", "audit this", "probe for bugs", "security audit", "find vulnerabilities".
+description: TDD-based issue discovery, hook-enforced. Use when user wants to find bugs, security holes, or code quality issues by writing failing tests that prove problems exist. Triggers: "red sweep", "find issues", "audit this", "probe for bugs", "security audit", "find vulnerabilities".
 user-invocable: true
 argument-hint: "<scope> <focus-area>"
+hooks:
+  PreToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts pre-write"
+          timeout: 30
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts pre-bash"
+          timeout: 30
+  PostToolUse:
+    - matcher: "Write|Edit"
+      hooks:
+        - type: command
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts post-write"
+          timeout: 60
+  Stop:
+    - hooks:
+        - type: command
+          command: "bun ${CLAUDE_SKILL_DIR}/scripts/state-machine.ts stop"
+          timeout: 10
 ---
 
 # Red Sweep
 
-Two-phase TDD-based issue discovery. The user defines the scope and focus; you write failing tests to prove problems exist, then fix them one at a time.
+TDD-based issue discovery, enforced by a state-machine hook. The agent's job is to do **INIT** with the user; from then on, hooks (`scripts/state-machine.ts`, run with `bun`) enforce the discipline so the agent can't drift.
 
-The red tests ARE the exploration tool. Don't speculate about issues — prove them with executable tests.
+**Runtime requirement:** [Bun](https://bun.sh) on `PATH`. The hooks shell out to `bun scripts/state-machine.ts ...`.
 
-**Both phases are sequential and disciplined.** Phases are separate (all discovery, then all fixes), but *within* each phase you work strictly one item at a time. No batching.
+## State machine
 
-## Phase 1 — Red Sweep (discovery)
+```
+INIT  ──(state.json written)──▶  DISCOVERING ◀──┐
+                                     │          │
+                                  red test       file finding
+                                  written        (issue or md)
+                                     │          │
+                                     ▼          │
+                                  FILING ───────┘
 
-1. **Get scope and focus from the user.** Scope = codebase, file, PR, or commit. Focus = what to look for (security, perf, correctness, race conditions, input validation, etc.).
-2. **Detect the existing test framework.** Look at the repo — vitest, jest, pytest, go test, rspec, whatever's there. Use it. Don't introduce a new framework.
-3. **Detect the issue-tracking standard.** GitHub issues if `gh` is available and the repo has a remote, otherwise default to a markdown report file (e.g. `RED-SWEEP.md`).
-4. **Scan sequentially within the focus area, ONE issue at a time.** Loop:
-   - Find the next plausible issue
-   - Write ONE failing test that proves it exists
-   - File the finding (issue or markdown entry) with reproduction steps and a link to the test
-   - Then — and only then — go look for the next issue
-5. **Do NOT fix anything during discovery.** Do NOT batch tests (no "let me write five tests at once"). One issue → one test → one filed finding → next issue.
-6. Output at the end of Phase 1: a list of filed findings, each with its red test.
+(Stop is gated: blocked while finding_count == 0, until loop_limit attempts.)
+```
 
-## Phase 2 — Vertical Fix
+State lives in `.red-sweep/state.json` at the project root. The hook script reads it on every tool call.
 
-For each finding, one at a time:
+## Phase 1 — INIT (your job; no enforcement yet)
 
-1. Pick one finding.
-2. Write the **minimal** fix that makes its red test pass.
-3. Run the test. Confirm green.
-4. Commit. **One finding, one fix, one commit.**
-5. Move to the next finding.
+While `state.json` does not exist, hooks allow everything. Use this window to interview the user and detect the project conventions, then write `state.json`.
 
-**Never** horizontal-slice fixes (don't fix several things, then commit). **Never** refactor while red.
+Detect, propose, and confirm with the user:
 
-## Test quality rules
+- **`test_cmd_full`** — full-suite command (e.g. `npx vitest run`, `pytest`, `go test ./...`).
+- **`test_cmd_single`** — single-file command with a `{file}` placeholder (e.g. `npx vitest run {file}`, `pytest {file}`).
+- **`test_pattern`** — basename glob (e.g. `*.test.ts`, `*.spec.ts`, `test_*.py`).
+- **`test_dir`** — directory tests live under (e.g. `test`, `__tests__`, `tests`). Empty string = no dir constraint.
+- **`test_marker_regex`** — regex that matches one test declaration. Defaults: JS-ish `^\s*(it|test)\s*\(`, Python `^\s*def test_`. Used to count tests in a file (baseline vs after-write).
+- **`tracker`** — `"github"` (uses `gh issue create`) or `"markdown"`.
+- **`findings_file`** — only if `tracker == "markdown"` (e.g. `RED-SWEEP.md`).
+- **`focus`** — what to look for: security, correctness, perf, race conditions, input validation, etc. User-defined.
+- **`scope`** — codebase / specific files / PR / commit.
+- **`loop_limit`** — max Stop attempts allowed with zero findings before Stop is permitted (default `10`).
 
-- Tests verify behavior through **public interfaces**, not implementation details.
-- Tests should survive internal refactors.
-- Mock **only at system boundaries** — external APIs, time, randomness, filesystem when truly needed.
-- Minimal code per test. No speculative features. No "while I'm here" assertions.
+Initial values to also write:
 
-## Per-cycle checklist
+```json
+{
+  "state": "DISCOVERING",
+  "finding_count": 0,
+  "stop_attempts": 0,
+  "current_test": "",
+  "baseline_test_count": 0,
+  "pending_test_file": ""
+}
+```
 
-Discovery cycle:
-- [ ] Test describes behavior, not implementation
-- [ ] Test uses the public interface only
-- [ ] Test would survive an internal refactor
-- [ ] Finding is filed with reproduction steps
+Once you write `state.json` with `state: "DISCOVERING"`, the hooks take over.
 
-Fix cycle:
-- [ ] Code change is the minimum needed for this test to pass
-- [ ] Exactly one finding addressed in this commit
-- [ ] No refactors smuggled in while red
+## Phase 2 — DISCOVERING (hook-enforced)
 
-## Anti-patterns
+What hooks allow:
 
-- Guessing at bugs without writing a test that proves them.
-- Batching discovery: writing several red tests in one pass before filing any. Work one issue at a time.
-- Bundling multiple fixes "since they're all small."
-- Refactoring during the fix cycle — do that on a separate green pass.
-- Mocking internal modules to make a test pass — that proves nothing.
+- Read, Grep, Glob — unrestricted.
+- Bash — read-only commands. **Blocked:** `git commit`, `git push`, `git reset`, `git checkout`, `git rebase`, `git merge`, `rm`.
+- Write/Edit — **only test files** (basename matches `test_pattern` AND path under `test_dir`).
+
+What the post-write hook checks on every test write:
+
+1. Was a new test added? (delta of `test_marker_regex` matches must be exactly **+1**.)
+2. Does the new test **fail**? (Runs `test_cmd_single` with `{file}` substituted; non-zero exit required.)
+
+If yes to both, state transitions to **FILING** and `current_test` is locked to that file. You then have to file before doing anything else.
+
+Failure modes the hook will surface back to you:
+
+- "Only test files may be edited" — you tried to fix source while red. Don't.
+- "Already a red test that hasn't been filed" — you tried to write a second test before filing the first.
+- "Did not add a new test" / "added N tests" — write exactly one test per cycle.
+- "Tests pass" — your red test isn't actually red. A passing test proves nothing.
+
+## Phase 3 — FILING (hook-enforced)
+
+What hooks allow:
+
+- If `tracker == "github"`: `gh issue create ...`.
+- If `tracker == "markdown"`: Write/Edit on `findings_file` only.
+
+On a successful filing action, the hook increments `finding_count`, clears `current_test`, and transitions back to **DISCOVERING**.
+
+Everything else — source edits, more test files, `git commit` — is blocked.
+
+## Stop gating
+
+The Stop hook checks `finding_count`:
+
+- `> 0` → stop allowed.
+- `== 0` and `stop_attempts < loop_limit` → stop blocked, attempts incremented.
+- `== 0` and `stop_attempts >= loop_limit` → stop allowed (you genuinely found nothing).
+
+## Why hooks, not prompt discipline
+
+Prompt-only TDD drifts: you batch tests, you sneak fixes in, you commit half-green. Hooks make the rules unforgeable — the harness denies the tool call before the model can rationalize around it.
+
+Phase 2 (the actual fix-each-finding work) lives outside this skill. After discovery, the agent (or a separate session) opens each filed finding and fixes it one at a time.
