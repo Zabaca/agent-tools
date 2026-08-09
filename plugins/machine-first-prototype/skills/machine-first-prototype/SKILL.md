@@ -206,6 +206,17 @@ anyone else where one is.
   shared control off.
 - **Put the how-this-works prose behind a `<details>`.** The first viewport
   should open on the index and the cards, not two paragraphs about freezing.
+- **Drive each card once, keyed on the reset counter — not a boolean cleared by
+  a second effect.** React double-invokes effects in development and runs the
+  clearing effect's second pass first, so every drive is sent twice: harmless
+  for an idempotent event, and a toggle flips back. One build had a card
+  headed "Collapsed" sitting in `expanded`, on the page whose whole purpose is
+  showing which state something is in.
+- **Assert that no card claims a state its actor is not in.** The coverage
+  banner compares *declared* paths against the machine's list, so a card that
+  declares one state and reaches another satisfies it. Publish the claimed
+  paths beside the live ones and compare them in a test — it is the same
+  comparison the card already makes to decide whether to offer Reset.
 - **Choose columns or a grid on the evidence.** Card heights vary enormously — a
   four-line `loading` card beside a card rendering a whole application — and a
   grid row is as tall as its tallest member, so one build left half a screen of
