@@ -122,8 +122,42 @@ without design covering for them.
 
 - Render one button per accepted event, filtered from a single candidate list
   through `snapshot.can()`. Never hard-code which buttons a status gets.
-- Print the raw state value for every actor, including each parallel region.
+- Show which events the current configuration has **no handler for at all**,
+  separately from the ones it accepts. That distinction is the whole point of
+  the rendering.
+- Print the live state value for every actor, including each parallel region.
 - Native controls, hairline borders, no colour system.
+
+**Three rules that decide whether anyone can actually read it.** Six bare
+renderings were built before these were written down, and five were unreadable
+in the same three ways.
+
+- **Keep the designed layout.** Same columns, same widths, same panes, same
+  starting state — stripped, not rearranged. It is tempting to stack everything
+  into one scroll because layout utilities are permitted and nothing forbids it;
+  one build flattened a three-column workspace under a heading that still read
+  *"The three columns"*. The renderings exist to claim **same behaviour,
+  different presentation**, and that claim is checkable by eye only if the layout
+  is the constant.
+- **Give nesting a depth ramp.** "No colour, no shadow, no radius, no weight" is
+  very nearly a list of the properties that encode hierarchy, leaving containment
+  and indentation. Two levels deep that is fine; four levels deep every level
+  draws the same 1px box and the page becomes one texture. So define three
+  neutral greyscale surfaces keyed to *nesting depth* — not to meaning — and
+  apply them by depth. Watch for a thick side rule (`border-l-4`) appearing:
+  independent authors reach for it when it is the only distinguishing device
+  left, which means the ramp is what they wanted.
+- **Do not teach in it.** The model belongs in the states explorer, beside the
+  state it describes, and in the README. A bare page carrying paragraphs about
+  parallel regions and a checkbox per exported state path is two documents
+  interleaved — a specification and a product, both drawn as 1px boxes, with
+  nothing to tell them apart. Keep **instrumentation** instead, in a thin band
+  above or below the page: live region paths, accepted events, unhandled events,
+  what the spawned children are doing.
+
+The mechanical tell of the third one is an import of the exported
+`*_STATE_PATHS` list into the bare page. Live paths come off the snapshot and
+need no import.
 
 ### 5. Designed page
 
@@ -162,6 +196,38 @@ state. Screenshots alone miss overlap, z-index, and anything behind a click.
 
 Report what the driver printed, not a claim that it works.
 
+**Keep a browser-seam test, not just screenshots.** A page that renders one frame
+stale passes every headless check: it mounts, nothing throws, no resource fails.
+It took a purpose-written browser test to catch a page whose machines had both
+carousels suspended while the DOM said they were advancing. Anything that is a
+claim about **React** rather than about a machine — a view that does not repaint,
+a control that never reaches an actor, text disagreeing with its own snapshot —
+is invisible at the actor seam and belongs here.
+
+The bare page is the surface to drive. It turns implicit inputs (scroll, hover,
+elapsed time) into explicit controls and publishes state as attributes, so a test
+can assert *"the machine is in `advance.paused`"* by reading a `data-` attribute
+rather than inferring it from pixels.
+
+### 8. Ship the check with the rule
+
+Any rule stated here that a script could verify, verify. A rule that lives only
+in prose is a rule the next build will drift from — one of these documents
+claimed for six builds that a constraint was "mechanically checkable, one file to
+grep", and nothing was grepping it. When the grep was finally written it found
+five violations, all introduced by authors who had read the rule.
+
+A source scan is a legitimate test when the property is about what the source
+says, and no amount of driving a page can observe "this class was never used".
+Two worth having: the banned-utility grep over the bare skin, and a check that
+the bare layout still matches the designed one.
+
+Then **mutation-check it** — break the behaviour on purpose and confirm the test
+fails. Several tests written across these builds passed vacuously: one asserted a
+refusal that was really a 415 from the body parser, another covered a guard that
+was unreachable, and it passed *because* the guard was inert. Any error satisfies
+"it failed", including the wrong one.
+
 ## Reporting
 
 State the machine decomposition, the one or two states that were the reason to
@@ -182,4 +248,15 @@ it.
   explains itself rather than ignoring the click.
 - A second "demo" copy of a machine for the explorer. Use `.provide()`; a copy
   drifts.
+- A bare page that stacks what the designed page lays out in columns, or that
+  teaches the model instead of instrumenting the product.
+- Freezing the explorer with `Number.MAX_SAFE_INTEGER`. It overflows
+  `setTimeout`'s 32-bit delay and is clamped to 1ms, so the "frozen" state
+  advances immediately. Use `2_147_483_647`.
+- A guarded push-down whose guard reads the child it is about to write to. It
+  terminates only when the event came from outside the child, so it works until
+  the day an interaction starts there, and then it hangs silently.
+- Stating a rule nothing checks. If a script could verify it, write the script;
+  otherwise expect the next build to break the rule while believing it followed
+  it.
 - Claiming a page works because it compiled. Run it, screenshot it, click it.
