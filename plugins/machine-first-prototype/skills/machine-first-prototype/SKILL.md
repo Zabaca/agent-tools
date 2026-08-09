@@ -186,6 +186,33 @@ One card per machine state, each rendering the **real component** driven by a
 - Show a coverage banner comparing scenarios against the exported path list.
 - Give each card a one-line blurb and the question it answers for the user.
 
+**Give it a map.** This page ends up twenty to forty cards long, and every build
+so far produced one unbroken scroll: you cannot see what is on the page without
+paging through it, you cannot return to a state you passed, and you cannot tell
+anyone else where one is.
+
+- **An index down the left**, in a `<nav aria-label="States">`, sticky, with its
+  own scroll. It lists every **scenario** under its machine, not only the
+  machines — the machine headings were always findable and the states were not.
+- **Every card carries an `id`**, so an index entry is a jump and a state is a
+  link somebody can send. Assert that every index link resolves to exactly one
+  card: renaming a scenario leaves a link that still renders, still looks right,
+  and goes nowhere, and nothing else on the page can tell.
+- **One filter, shared.** A search over scenario names and state paths, spanning
+  every machine, with the index counts and the cards computed from the same
+  predicate so they cannot disagree. A control sitting beside one grid that
+  silently binds only that grid's scenarios is worse than none — that is what
+  one build shipped, purely because there was no list of machines to hang a
+  shared control off.
+- **Put the how-this-works prose behind a `<details>`.** The first viewport
+  should open on the index and the cards, not two paragraphs about freezing.
+- **Choose columns or a grid on the evidence.** Card heights vary enormously — a
+  four-line `loading` card beside a card rendering a whole application — and a
+  grid row is as tall as its tallest member, so one build left half a screen of
+  dead space. `columns-[Npx]` with `break-inside-avoid` packs them. The cost is
+  reading order, down each column rather than across, so it is only worth paying
+  where the heights really do differ; look at the page before deciding.
+
 ### 7. Verify in a browser
 
 Screenshot every page headlessly and **look at them**. Then drive the real
@@ -221,6 +248,12 @@ A source scan is a legitimate test when the property is about what the source
 says, and no amount of driving a page can observe "this class was never used".
 Two worth having: the banned-utility grep over the bare skin, and a check that
 the bare layout still matches the designed one.
+
+Where the property is about the **rendered document** rather than the source,
+the same principle sends it to the browser seam instead. The states index is the
+example: that every link in it resolves to exactly one card is unobservable from
+the source, invisible to every other gate, and the exact thing that rots when
+somebody renames a scenario six weeks later.
 
 Then **mutation-check it** — break the behaviour on purpose and confirm the test
 fails. Several tests written across these builds passed vacuously: one asserted a
