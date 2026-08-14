@@ -91,6 +91,12 @@
       "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways \u2014 bare functional, designed, and a state explorer covering every reachable state.",
       "version": "0.1.0",
       "source": "./plugins/machine-first-prototype"
+    },
+    {
+      "name": "ship",
+      "description": "Work a dependency-ordered ticket backlog to done \u2014 resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
+      "version": "0.1.0",
+      "source": "./plugins/ship"
     }
   ]
 }

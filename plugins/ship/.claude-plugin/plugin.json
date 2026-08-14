@@ -1,0 +1,10 @@
+{
+  "name": "ship",
+  "version": "0.1.0",
+  "description": "Work a dependency-ordered ticket backlog to done — resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
+  "author": {
+    "name": "Zabaca"
+  },
+  "keywords": ["tickets", "dag", "orchestration", "code-review", "subagents"],
+  "skills": "./skills/"
+}
