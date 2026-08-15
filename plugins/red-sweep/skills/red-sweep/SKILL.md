@@ -1,6 +1,6 @@
 ---
 name: red-sweep
-description: TDD-based issue discovery. Use when user wants to find bugs, security holes, or code quality issues by writing failing tests that prove problems exist. Triggers: "red sweep", "find issues", "audit this", "probe for bugs", "security audit", "find vulnerabilities".
+description: 'TDD-based issue discovery. Use when user wants to find bugs, security holes, or code quality issues by writing failing tests that prove problems exist. Triggers: "red sweep", "find issues", "audit this", "probe for bugs", "security audit", "find vulnerabilities".'
 user-invocable: true
 argument-hint: "<scope> <focus-area>"
 ---

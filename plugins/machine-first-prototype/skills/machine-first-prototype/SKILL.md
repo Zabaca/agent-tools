@@ -1,6 +1,6 @@
 ---
 name: machine-first-prototype
-description: Turn app screenshots into a working prototype: model the state machines first, verify them headlessly, then render three ways — bare, designed, and a state explorer. Use when given screenshots and asked to prototype or model an app's states.
+description: "Turn app screenshots into a working prototype: model the state machines first, verify them headlessly, then render three ways — bare, designed, and a state explorer. Use when given screenshots and asked to prototype or model an app's states."
 user-invocable: true
 ---
 
