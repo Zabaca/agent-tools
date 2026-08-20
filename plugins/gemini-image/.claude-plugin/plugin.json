@@ -1,7 +1,7 @@
 {
   "name": "gemini-image",
-  "version": "0.1.0",
-  "description": "Generate and edit images using Gemini 2.5 Flash from Claude Code",
+  "version": "0.2.0",
+  "description": "Generate and edit images using Google's Nano Banana models (configurable; defaults to Nano Banana 2 Lite) from Claude Code",
   "author": { "name": "Zabaca" },
   "keywords": ["gemini", "image", "ai", "generation"],
   "skills": "./skills/",

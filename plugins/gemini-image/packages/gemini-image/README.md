@@ -1,12 +1,13 @@
 # @zabaca/gemini-image
 
-CLI for Gemini image generation using Google's Nano Banana (Gemini 2.5 Flash Image) model.
+CLI for Gemini image generation using Google's Nano Banana models.
+Defaults to Nano Banana 2 Lite (`gemini-3.1-flash-lite-image`).
 
 ## Features
 
 - **Generate images** from text prompts
 - **Edit existing images** with text instructions
-- **Free tier**: 500 requests/day via Google AI Studio
+- **Configurable model** via `GEMINI_IMAGE_MODEL` or `-m/--model`
 - Simple CLI interface
 
 ## Installation
@@ -18,7 +19,7 @@ npm install -g @zabaca/gemini-image
 Or run directly with npx:
 
 ```bash
-npx @zabaca/gemini-image generate "a sunset over mountains" -o sunset.png
+npx @zabaca/gemini-image generate "a sunset over mountains" -o sunset.jpg
 ```
 
 ## Setup
@@ -36,6 +37,12 @@ Or create a `.env` file:
 GEMINI_API_KEY=your-api-key-here
 ```
 
+3. Optionally pick a model (defaults to `gemini-3.1-flash-lite-image`):
+
+```bash
+export GEMINI_IMAGE_MODEL=gemini-3.1-flash-image
+```
+
 ## Usage
 
 ### Generate Image
@@ -43,11 +50,12 @@ GEMINI_API_KEY=your-api-key-here
 Generate an image from a text prompt:
 
 ```bash
-gemini-image generate "a futuristic city at sunset with flying cars" -o city.png
+gemini-image generate "a futuristic city at sunset with flying cars" -o city.jpg
 ```
 
 **Options:**
 - `-o, --output <path>` (required) - Output file path
+- `-m, --model <model>` - Model to use (defaults to `$GEMINI_IMAGE_MODEL`)
 
 ### Edit Image
 
@@ -63,6 +71,7 @@ gemini-image edit input.png "add a rainbow in the sky" -o edited.png
 
 **Options:**
 - `-o, --output <path>` (required) - Output file path
+- `-m, --model <model>` - Model to use (defaults to `$GEMINI_IMAGE_MODEL`)
 
 **Supported formats:** PNG, JPG, JPEG, GIF, WebP
 
@@ -70,10 +79,10 @@ gemini-image edit input.png "add a rainbow in the sky" -o edited.png
 
 ```bash
 # Generate a landscape
-gemini-image generate "serene mountain lake at dawn, photorealistic" -o lake.png
+gemini-image generate "serene mountain lake at dawn, photorealistic" -o lake.jpg
 
 # Generate abstract art
-gemini-image generate "abstract geometric patterns in blue and gold" -o abstract.png
+gemini-image generate "abstract geometric patterns in blue and gold" -o abstract.jpg
 
 # Edit an image
 gemini-image edit photo.jpg "make the sky more dramatic with storm clouds" -o dramatic.png
@@ -82,13 +91,25 @@ gemini-image edit photo.jpg "make the sky more dramatic with storm clouds" -o dr
 gemini-image edit portrait.png "add sunglasses" -o portrait-sunglasses.png
 ```
 
-## API
+## Models
 
-This CLI uses Google's **Gemini 2.5 Flash Image** model (codename: Nano Banana).
+| Model | Name | Per image @1K |
+|---|---|---|
+| `gemini-3.1-flash-lite-image` | Nano Banana 2 Lite (default) | $0.0336 |
+| `gemini-2.5-flash-image` | Nano Banana (legacy) | $0.039 |
+| `gemini-3.1-flash-image` | Nano Banana 2 | $0.067 |
+| `gemini-3-pro-image` | Nano Banana Pro | $0.134 |
 
-**Free Tier:** 500 requests/day via Google AI Studio API key
+Precedence: `-m/--model` > `GEMINI_IMAGE_MODEL` > default.
 
-**Pricing:** ~$0.15 per 4K generation after free tier
+**No free tier.** Image generation requires a billing-enabled API key.
+
+### Output format
+
+Output format depends on the model: the 3.x models return JPEG, while
+`gemini-2.5-flash-image` returns PNG. The file is always written to the exact
+`-o` path you give, and the CLI warns when that extension disagrees with the
+actual bytes. On the default model, prefer `.jpg`.
 
 ## Requirements
 
