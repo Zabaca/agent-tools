@@ -1,8 +1,17 @@
 {
   "name": "grill-options",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An inverted grilling session: a subagent grills Claude about a plan, Claude answers from the codebase and forks the design tree at every genuine value tradeoff, and the user is handed 2-4 fully-grilled options with impact, outcome, and pros/cons to pick from.",
-  "author": { "name": "Zabaca" },
-  "keywords": ["grilling", "planning", "design-tree", "options", "adr", "decision"],
+  "author": {
+    "name": "Zabaca"
+  },
+  "keywords": [
+    "grilling",
+    "planning",
+    "design-tree",
+    "options",
+    "adr",
+    "decision"
+  ],
   "skills": "./skills/"
 }

@@ -42,14 +42,27 @@ final options, except to abort if the request is fundamentally underspecified �
 
 ## The loop
 
-### 1. Kickoff
+One variant at a time. A variant is grilled to an empty frontier and written up
+as a complete option before the next variant starts. Never run variants in
+parallel, and never let one grilling session hold two branches at once — a
+grilling agent juggling branches asks shallower questions of each, and you
+answer them worse.
 
-Capture the subject in the user's own words, verbatim, into a brief. Add: the
-repo, the constraints they stated, anything they explicitly ruled out. This
-brief is the *only* source of user intent you get. Anything not in it, and not
-derivable from the codebase, is a candidate fork — not something to assume.
+### 1. Kickoff — hand over the subject, not your analysis
 
-Spawn one grilling agent with the brief and the grilling contract below.
+Give the grilling agent the subject in the user's own words, verbatim, plus the
+constraints they stated, anything they explicitly ruled out, and the path to the
+repo. That is all.
+
+Do NOT hand it your own reading of the problem: no candidate groupings, no
+hypotheses, no table of facts you already gathered, no shortlist of what you
+think the options are. That material pre-draws the map the agent exists to draw,
+and you will get your own assumptions back with question marks on them.
+
+The agent must establish its own facts before round 1 — read the repo, run what
+it can run, and open by contesting anything it cannot verify. A round 1 that
+arrives with zero tool calls is a warning sign: the agent is grilling your
+framing rather than the subject. Send it back to look before it asks.
 
 ### 2. Rounds
 
@@ -60,51 +73,77 @@ you re-classify freely, the tag is a hint not a verdict.
 
 You answer the whole round in one reply. For each question, pick one:
 
-- **Answer from fact.** Read the code. Cite `file:line`. Facts are never
-  forks and never questions for the user.
+- **Answer from fact.** Read the code. Cite `file:line`. Where an answer can be
+  settled by running something rather than reasoning about it, run it. Facts are
+  never fork points and never questions for the user.
 - **Answer from the brief.** The user already said this, explicitly or by
   clear implication. Quote their words in the answer.
 - **Answer from judgement.** No real trade-off — one answer dominates given
   everything settled so far. Say why it dominates.
-- **Fork.** See the gates below.
+- **Answer and record a fork point.** See the gates below.
 
-Never answer "ask the user". The user is not in the room.
+Never answer "ask the user". The user is not in the room. A question only the
+user could truly settle — a fact about their intentions, not about the world —
+gets answered with your best reading and becomes that option's **Wrong if**
+condition, so the user sees exactly what their choice rests on.
+
+Contradict the agent when it is wrong. A grilling agent that is never corrected
+is being agreed with, not used.
 
 ### 3. The fork gates
 
-Fork only when **all three** hold:
+A question is a **fork point** when all three hold:
 
 1. **Both answers survive the brief.** Nothing the user said rules either out.
 2. **The user would feel the difference.** Different cost, timeline, UX,
    operational burden, or reversibility — not just different internals.
 3. **The difference survives to the end.** A later decision does not erase it.
 
-Fail any gate and you answer it yourself. A question that fails gate 2 but was
+Fail any gate and you simply answer it. A question that fails gate 2 but was
 genuinely close gets answered *and* recorded as a **close call** — it appears in
 the final report under the option it affects, so the user can reopen it.
 
-When you fork, tell the grilling agent to continue **both** branches: same tree,
-that answer pinned differently. Branches that reconverge — identical remaining
-frontier, identical pinned answers downstream — merge back; do not re-grill
-shared subtrees.
+A fork point does NOT branch the current session. Pin your recommended answer,
+write the fork point down with both candidate answers, and let the grilling
+agent carry on with the pin in place. The variant in flight stays one coherent
+tree. The alternative answers are what later variants are made of.
 
-### 4. Budget
+### 4. The next variant
 
-Hard caps, because the tree is exponential:
+When a variant's frontier is empty and its option is written up, pick the
+unexplored fork point with the largest downstream blast radius and start the
+next variant on it.
 
-- **3 fork axes** maximum.
-- **4 final options** maximum.
-- If a fifth axis passes the gates, keep the axes with the largest downstream
-  blast radius, answer the rest with your recommendation, and list them as close
-  calls.
+Spawn a **fresh** grilling agent for each variant — the previous one's tree is
+committed to its pins and cannot honestly re-open them. Hand the new agent:
 
-### 5. Termination
+- the same kickoff brief, unchanged;
+- everything settled in earlier variants that does NOT hang off this fork point,
+  marked as settled and not to be re-litigated;
+- the fork point, pinned to the answer this variant is exploring.
 
-A branch is done when its frontier is empty and the grilling agent has nothing
-left. Every branch must reach that state — a half-grilled option is not an
-option, it is a guess with a table around it. Kill a branch outright if grilling
-reveals it violates a hard constraint from the brief, and report it as
-**eliminated**, with the question that killed it.
+Each variant after the first is cheaper than the last, because the common ground
+keeps growing. If a variant's grilling reveals it is not actually distinct once
+finished — same outcome, same impact — merge it into the option it duplicates
+and move to the next fork point.
+
+### 5. Budget
+
+Hard caps, because fork points multiply:
+
+- **4 variants** maximum, so at most 4 sequential grilling sessions.
+- **3 fork points** explored; the rest are answered and listed as close calls.
+- If a fifth fork point passes the gates, keep the ones with the largest
+  downstream blast radius and answer the others with your recommendation.
+
+### 6. Termination
+
+A variant is done when its frontier is empty and the grilling agent confirms it
+explicitly. Every variant must reach that state — a half-grilled option is not
+an option, it is a guess with a table around it. Kill a variant outright if
+grilling reveals it violates a hard constraint from the brief, and report it as
+**eliminated**, with the question that killed it. An eliminated variant does not
+consume a slot; move to the next fork point.
 
 ## The options document
 
@@ -169,10 +208,15 @@ Give the subagent this, verbatim, plus the brief:
 > a design call. Never answer your own questions. Never soften a question
 > because the answer seems obvious — an obvious answer is cheap to give.
 >
-> The answering agent may reply `FORK: <answer A> | <answer B>` to a question.
-> When it does, continue the tree twice from that point, once per pinned answer,
-> and label every later round with which branch it belongs to. Branches with an
-> identical remaining frontier merge back into one.
+> Before round 1, go and look: read the repo, run what you can run, and verify
+> the brief rather than trusting it. Open by contesting any claim in it you
+> could not confirm. Asking questions off an unverified brief is the one way
+> this session fails silently.
+>
+> The answering agent may reply `FORK POINT: <pinned answer> | <alternative>`.
+> That is not an instruction to branch. Carry on with the pinned answer in
+> place, on one tree. The alternative is explored in a separate session later,
+> and is not your concern.
 >
 > Push on: what breaks under load, what happens on failure, what the user
 > cannot undo, what is being assumed about scale, who else depends on this,
@@ -180,11 +224,11 @@ Give the subagent this, verbatim, plus the brief:
 > every branch, and say so explicitly per branch.
 
 Spawn it with the Agent tool, then continue the *same* agent each round with
-SendMessage addressed to its name — a fresh `Agent` call loses the tree. Keep
-one agent for the whole run — the tree is its context.
-Spawn a second only if a fork produces two subtrees big enough to be worth
-grilling in parallel; give the second one the settled answers so far and its
-pinned branch.
+SendMessage addressed to its name — a fresh `Agent` call loses the tree. One
+agent per variant, for the whole of that variant: the tree is its context.
+
+Never run two grilling agents at once. The next variant's agent is spawned only
+after the current variant's option is written.
 
 Facts are yours to find. If the grilling agent asks something the repo can
 answer and you would need to search widely, dispatch a read-only search
@@ -193,10 +237,15 @@ subagent rather than guessing or stalling the round.
 ## It's working if
 
 - The user is asked nothing between kickoff and the final options.
+- Round 1 arrives with the agent having read the repo itself, and disputes
+  something in your brief.
+- One grilling agent is alive at a time, and each variant is finished before the
+  next begins.
 - Every option is grilled to an empty frontier, not to a token budget.
 - Two options differ on a decision you can name in one sentence.
 - The facts in the answers cite real `file:line`, not recollection.
-- Some questions get answered, not forked — a run that forks everything has
-  abdicated, not analysed.
+- Some questions get answered, not recorded as fork points — a run that forks
+  everything has abdicated, not analysed.
+- You corrected the grilling agent at least once on a fact it got wrong.
 - A rejected option reads as something a competent person would have chosen.
 - The final message is a choice, not a plan of action.
