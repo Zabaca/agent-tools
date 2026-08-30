@@ -91,6 +91,12 @@
       "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways \u2014 bare functional, designed, and a state explorer covering every reachable state.",
       "version": "0.1.0",
       "source": "./plugins/machine-first-prototype"
+    },
+    {
+      "name": "grill-options",
+      "description": "An inverted grilling session: a subagent grills Claude about a plan, Claude answers from the codebase and forks the design tree at every genuine value tradeoff, and the user is handed 2-4 fully-grilled options with impact, outcome, and pros/cons to pick from.",
+      "version": "0.1.0",
+      "source": "./plugins/grill-options"
     }
   ]
 }
