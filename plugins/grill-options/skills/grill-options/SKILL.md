@@ -87,6 +87,12 @@ user could truly settle — a fact about their intentions, not about the world �
 gets answered with your best reading and becomes that option's **Wrong if**
 condition, so the user sees exactly what their choice rests on.
 
+A question about the world that you cannot settle — a GUI you cannot drive, a
+service you cannot reach — is neither. Do not guess it and do not bury it in a
+recommendation: answer conservatively, and record it as that option's **open
+verification**, naming the consequence both ways. One glance from the user
+settles it later; a guess pretends it is already settled.
+
 Contradict the agent when it is wrong. A grilling agent that is never corrected
 is being agreed with, not used.
 
@@ -123,7 +129,15 @@ committed to its pins and cannot honestly re-open them. Hand the new agent:
 - the fork point, pinned to the answer this variant is exploring.
 
 Each variant after the first is cheaper than the last, because the common ground
-keeps growing. If a variant's grilling reveals it is not actually distinct once
+keeps growing.
+
+**A later variant will break an earlier variant's facts.** Expect it — a fresh
+agent checks things the last one took on trust. When it happens, go back and
+correct the option already written: fix the claim, and re-grade any Pro or Con
+that rested on it, even if that turns a benefit into a cost. An options document
+whose first option is argued on facts its third option disproved is worse than
+useless, because it reads as finished. Corrections propagate backward; that is
+the reason variants run in sequence rather than at once. If a variant's grilling reveals it is not actually distinct once
 finished — same outcome, same impact — merge it into the option it duplicates
 and move to the next fork point.
 
@@ -223,6 +237,11 @@ Give the subagent this, verbatim, plus the brief:
 > and what the plan silently does not do. Stop when the frontier is empty on
 > every branch, and say so explicitly per branch.
 
+Give each grilling agent **its own scratch directory** and tell it to write
+nowhere else. A griller that runs experiments will otherwise collide with your
+own scratch fixtures — that happens, and you lose a fixture mid-round without
+noticing why.
+
 Spawn it with the Agent tool, then continue the *same* agent each round with
 SendMessage addressed to its name — a fresh `Agent` call loses the tree. One
 agent per variant, for the whole of that variant: the tree is its context.
@@ -246,6 +265,8 @@ subagent rather than guessing or stalling the round.
 - The facts in the answers cite real `file:line`, not recollection.
 - Some questions get answered, not recorded as fork points — a run that forks
   everything has abdicated, not analysed.
-- You corrected the grilling agent at least once on a fact it got wrong.
+- You corrected the grilling agent at least once on a fact it got wrong, and it
+  corrected you at least once on a fact you got wrong.
+- When you asked whether the frontier was empty, the agent was willing to say no.
 - A rejected option reads as something a competent person would have chosen.
 - The final message is a choice, not a plan of action.
