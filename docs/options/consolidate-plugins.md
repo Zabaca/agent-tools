@@ -2,250 +2,167 @@
 
 Subject, verbatim: **"opportunity to consolidate plugins"**
 
-Produced by `/grill-options`. A grilling subagent walked the design tree over four
-rounds; answers came from this repo and from live experiments against the Claude
-Code CLI. Two fork axes survived the gates; a third candidate was withdrawn as
-common ground.
+Produced by `/grill-options` v0.2.0. This supersedes the version committed in
+`4c7fd75`, which was produced by v0.1.0 and contained a false central claim (it
+asserted every plugin passes `claude plugin validate`; three do not). The earlier
+document is preserved in git history.
+
+Method: a grilling subagent establishes its own facts from the repo, then
+interviews the main thread in rounds. Variant 1 took six rounds. Where a question
+was a genuine value trade-off the brief did not settle, the recommended answer was
+pinned and the alternative recorded as a fork point for a later variant.
+
+---
 
 ## What grilling established before any option
 
-These hold under every option below.
+**Three plugins are broken right now.** `x-cli`, `google-cli` and `gemini-image`
+each fail `claude plugin validate`: their `hooks.json` opens directly into
+`"SessionStart": [...]` with no `hooks` wrapper, so the CLI reports `root:
+hooks.json must have 'hooks' … or 'modules'`. Those hooks run `bun install` for
+the plugin's dependencies, so it is not established that these plugins have ever
+worked on a fresh install. They are also the three the README advertises.
 
-**The premise "consolidate plugins" mostly does not survive contact with the repo.**
-The two things "consolidation" normally means both evaporated:
+**The version guard has been manufacturing the drift it exists to prevent.**
+`.husky/check-plugin-versions.sh` forces a manifest bump when any file under
+`plugins/<name>/` is staged. Nothing syncs `marketplace.json`, so entry and
+manifest versions have diverged for `worktree-tickets` (0.1.0 vs 0.2.0) and
+`machine-first-prototype` (0.1.0 vs 0.4.0). `claude plugin validate .` reports
+both, and states the precedence: at install time `plugin.json` wins and the entry
+version is silently ignored.
 
-- *Merge plugins into kits.* Plugin hooks activate on enable, with no per-component
-  opt-in. A kit forces its hooks on anyone who wanted one skill from it. That kills
-  the worktree kit (cedarpad enables `create-worktree-friendly`, which has zero
-  hooks, and would silently gain a `PreToolUse` hook) and the CLI kit (three
-  `SessionStart` hooks).
-- *Dedupe shared plumbing.* The only real duplication is the NestJS/bun `packages/`
-  shape across `x-cli`, `google-cli` and `gemini-image` — which are precisely the
-  three plugins every option unlists. The shared-plumbing work has no live
-  beneficiary. What remains is five trivial shell scripts.
+**There are three consumer settings files, not one.** `cedarpad` and
+`zabaca/games` both have git-tracked `.claude/settings.json` enabling
+`create-worktree-friendly@zabaca-agent-tools`; this repo's own tracked settings
+enable three more. A broken identifier fails silently.
 
-**There is almost no coupling to consolidate.** In the repo's entire history only two
-commits touched more than one plugin directory, and one of those was a mechanical
-`skills:` path fix across five (`ebb0c0f`). Nine of fifteen plugins have not been
-touched since April 2026.
+**Deletion is house style.** `pm-agent` was removed outright in `e04f5d6`, not
+unlisted.
 
-**The dead set is real.** Zero enablement in any settings file and zero invocation
-evidence: `visual-mode`, `red-sweep`, `create-dev-start`, `gemini-image`,
-`google-cli`, `x-cli`, `claude-config-lint`. `orchestrator` is borderline — one
-history mention, no enablement.
+**There is no CI.** No `.github/`, no workflows. `.husky/pre-commit` is the only
+automation surface in the repo, so any gate is a pre-commit hook with the same
+`--no-verify` bypass as the guard it replaces.
 
-Those three CLI plugins are also the marketplace's entire advertised identity:
-`README.md:3` still reads "CLI tools for Claude Code — Twitter, Google Workspace,
-and Image Generation", and the README documents 3 of 15 plugins.
-
-**Consumers exist, and they are committed files.** `Zabaca/agent-tools` is public
-with 0 stars, 0 forks, 0 watchers. But `cedarpad/.claude/settings.json` enables
-`create-worktree-friendly@zabaca-agent-tools`, and this repo's own
-`.claude/settings.json` enables three more. Those files are checked in, so every
-clone inherits the identifiers, and a broken identifier fails silently.
-
-**Common ground in every option:** unlist the dead set from `marketplace.json` while
-keeping the code in git; generate the README from `marketplace.json` plus each
-manifest; add a validation gate (`claude plugin validate` across all plugins, plus
-marketplace-entry/manifest agreement and README freshness); name the marketplace
-honestly as a personal toolkit in `README.md:3`; and hand-review the eight surviving
-`description` strings. That last item is small but not automatic: generating the
-README from those fields makes them load-bearing, and they are also what a person
-reads in `/plugin` before installing. None of the eight has ever been graded.
+**Merging is out of scope — and that is the headline finding.** The user's own
+word is *consolidate*, and grilling concluded that merging directories is the one
+thing that should not happen. No merge reduces per-commit friction; every merge
+spends the alias mechanism to buy one install line; plugin hooks activate on
+enable with no per-component opt-in, so a kit forces its hooks on anyone who
+wanted one skill; and the only plugin with three tracked external pins is the one
+that must not move. This is a stated finding, not an omission.
 
 ## Facts established by experiment
 
-Four questions were settled by running the CLI rather than reasoning about it.
+Run against the live CLI rather than reasoned about.
 
 | Question | Result |
 | --- | --- |
-| Can two marketplace entries point at one plugin directory? | Yes — both validate, install, and enable |
-| Does an alias double-charge always-on tokens? | No — identity is the manifest `name`; `details thing-old` reports "not found" |
-| Do aliased hooks fire twice? | No — SessionStart hook fired exactly once with both entries enabled |
-| Does the guard kit re-impose the ceremony `(d)(ii)` removes? | No — `plugin-version-guard` is skill-only, `user-invocable`, scaffolds only on invocation |
+| Two marketplace entries pointing at one directory? | Both validate, install, enable |
+| Does an alias double-charge tokens or double-fire hooks? | No to both — identity is the manifest `name`; hook fired once |
+| Is entry `version` meaningful? | No — an entry of only `name` + `source` validates clean; carrying `version` generates a permanent drift warning |
+| Does `claude plugin validate` catch a dangling entry `source`? | **No.** An entry pointing at a nonexistent directory passes silently |
+| Does it catch a plugin directory with no entry? | **No.** An orphan directory passes silently |
+| Does an unbumped content change reach installed consumers? | **No.** `marketplace update` and `plugin update` both leave the cache stale; only a manifest bump creates a new `cache/<mp>/<plugin>/<version>/` and delivers the change |
 
-The alias finding cuts both ways, and the second edge matters more: an alias does
-not *preserve* the old plugin, it *redirects* the old name at the merged one. A
-stale key that stops resolving is discoverable; a key that silently grows a
-`PreToolUse` hook is not.
+The last two rows are the ones that shaped this option. The native CLI does not
+check the only invariant that has actually decayed here, and the manifest version
+is not decoration — it is the cache address and the sole update trigger.
 
-## Option 1 — Honest list
+---
 
-**Thesis:** the marketplace stops lying about what it contains, and the version
-ceremony goes with the plugins that needed it.
+## Option 1 — Fix, unlist, and gate what the CLI misses
 
-**The diff:** the version-bump guard is removed from this repo in the same commit
-that lands the validation gate. `plugin-version-guard` stays published for other
-people's repos; it just stops being enforced here.
+**Thesis:** nothing merges and nothing is deleted; the broken things get fixed,
+the storefront stops advertising them, and the version ceremony is replaced by a
+gate that checks the correspondence no tool checks today.
 
-**Outcome:** `marketplace.json` lists 8 plugins instead of 15. `README.md` is
-generated and accurate. Every commit touching `plugins/` runs a gate that fails if a
-plugin directory changed without its marketplace description or README entry being
-regenerated. `.husky/check-plugin-versions.sh` is gone, so editing a plugin no
-longer requires a manifest bump.
+**The diff (the pinned answers that define this option):**
+- The broken trio is **fixed and then unlisted** — code stays in the tree, valid.
+- A **hard-failing pre-commit gate** exists.
+- **Only broken or superseded plugins are unlisted** — twelve entries survive.
 
-**Impact:** touches `marketplace.json`, `README.md`, `.husky/`, and adds one gate
-script. No plugin directory moves, no identifier changes, nothing any consumer has
-to edit. Effort: hours. Fully reversible — the unlisted plugins are one JSON block
-away from returning.
+**Outcome:** `marketplace.json` lists 12 plugins, each entry reduced to `name`,
+`source` and `description`, with `version` dropped everywhere. The three broken
+`hooks.json` files are repaired. A pre-commit gate runs `claude plugin validate`
+over staged plugins plus the marketplace, and adds three assertions the CLI lacks:
+every entry's `source` resolves, every directory under `plugins/` has an entry
+(minus a named exception list), and every entry `description` matches its
+manifest. `plugin-version-guard` is rewritten to scaffold this gate instead of the
+version check. `README.md` becomes a stub pointing at `/plugin`. The blanket bump
+ceremony is gone, replaced by one narrow rule: bump the manifest when published
+behaviour changes.
 
-**Pros**
-- Removes friction that fires on every plugin commit, in exchange for a check that
-  catches what actually broke (a four-month-stale README).
-- The gate is a superset of the guard: the version guard structurally could not
-  catch stale docs, because it only knows a file was staged.
-- No consumer-visible change at all — nothing to migrate, nothing to announce.
-
-**Cons**
-- Versions freeze at whatever they are, permanently. If this marketplace ever gets
-  real external consumers, semver has to be reintroduced from a standing start.
-- Deletes the only automated check that fires today before its replacement has been
-  proven in practice.
-
-**Wrong if:** you intend to promote this marketplace publicly. The moment strangers
-install from it, a version number is the only channel you have to tell them
-something changed.
-
-**Close call:** the gate runs through `claude plugin validate` rather than this
-repo's own `claude-config-lint`. The native CLI tracks the real schema; the local
-Zod validator has already drifted (it rejects `disable-model-invocation`, a valid
-key shipping in `mattpocock-skills`).
-
-## Option 2 — Released toolkit
-
-**Thesis:** the same cleanup, but the marketplace is treated as a thing with
-releases.
-
-**The diff:** the version-bump guard stays, and a changelog is added per plugin. The
-enforceable rule is "every change bumps patch"; meaning lives in the changelog.
-
-**Outcome:** identical to Option 1 for the list, README, and gate. Additionally,
-each surviving plugin gets a `CHANGELOG.md`, `.husky/check-plugin-versions.sh`
-stays, and every plugin edit costs a bump plus a changelog line.
-
-**Impact:** everything Option 1 touches, plus 8 new changelog files and a stated
-bump rule. Effort: a day, and a recurring per-commit tax thereafter. Reversible, but
-the changelogs rot if abandoned.
+**Impact:** touches all 15 manifests' descriptions, `marketplace.json`, three
+`hooks.json` files, `README.md`, `.husky/`, and rewrites one plugin. No directory
+moves, no identifier changes, nothing any consumer must edit. Effort: a day.
+Reversible, except that the rewritten `plugin-version-guard` is a different
+product from the one three repos have installed.
 
 **Pros**
-- If external consumers ever appear, the communication channel already exists rather
-  than needing retrofitting.
-- A changelog is the artifact that would let you reconstruct why a plugin changed —
-  something git history technically holds but nobody reads.
+- The gate catches the two failures that silently break a marketplace — a dangling
+  entry and an unpublished directory — neither of which the native CLI reports.
+- Fixing the trio costs about five lines and converts "unproven, probably broken"
+  into "valid but unlisted", which is a defensible thing to keep in a tree.
+- Nothing a consumer has pinned changes, so the three tracked settings files
+  outside this repo keep resolving.
+- Entry `version` disappears, eliminating a whole warning class permanently.
 
 **Cons**
-- The rule the existing script can enforce is the meaningless one. It only knows a
-  file under `plugins/<name>/` was staged, so "every change bumps patch" is the only
-  option; `machine-first-prototype` reaches 0.40.0 by winter and the number still
-  tells nobody anything.
-- The real deliverable is therefore the changelog, hand-written, for an audience of
-  three of your own repos.
-- Four months of a README documenting 3 of 15 plugins is direct evidence about
-  hand-maintained prose in this repo.
+- The gate is per-commit friction, and reducing per-commit friction is the metric
+  this work was judged on. It spends the thing it was chosen to improve.
+- The narrow bump rule is unenforceable — the hook only knows a file was staged,
+  not whether behaviour changed — so it depends on the author remembering.
+- Keeping the trio in-tree requires a `.plugin-gate.json` exception list, which is
+  repo-specific state the scaffolded gate must never clobber. That is real added
+  machinery in a marketplace whose stated problem is surface area.
+- The rewritten plugin grows a pre-flight check, a `--dry-run` flag and a config
+  file it must not overwrite — more surface than the plugin it replaces.
 
-**Wrong if:** the audience stays what it is today. Versioning exists to talk to
-consumers you cannot reach by editing a file — and you can reach all of yours by
-editing a file.
+**Stated consequence — this marketplace ships a trap.** `git-clean-stop` exits 2
+on a dirty tree, so a session may not stop; a hard-failing gate means it may not
+commit. An agent that edits a plugin into an invalid state can do neither, and
+both plugins are enabled in this repo's tracked settings. This is accepted, with
+two mitigations: the gate prints the failing plugin, the exact validator message
+and the file to fix, and does **not** print `--no-verify`; and the scaffolding
+skill refuses to install a gate that would reject the repo's own clean tree.
 
-## Option 3 — Honest list plus a guard kit
+**Wrong if:** you want fewer things on the storefront. This option keeps twelve
+entries and adds machinery; it consolidates the repo's *correctness*, not its
+size. If "consolidate" meant "I want to see a shorter list", this is the wrong
+option and fork point 3 is where that lives.
 
-**Thesis:** Option 1, and the one merge that survives every rule gets made.
+**Close calls**
+- Native CLI as the gate engine rather than this repo's `claude-config-lint` —
+  which independently catches the trio's bug, but whose project mode does not walk
+  `plugins/` and which missed the version drift entirely. Two tools that already
+  disagree, with no stated authority between them, make gate failures ambiguous.
+- README as a stub rather than generated. A stub abandons the only place a human
+  can read what the marketplace is for.
+- The storefront line framed as a personal toolkit rather than neutrally
+  functional. `metadata.description` cannot be dropped — the CLI warns when it is
+  absent — and today it describes only the plugins being removed.
+- The gate is bootstrapped hand-written and back-ported to the plugin once stable,
+  rather than dogfooded from the start: because the cache only refreshes on a
+  bump, every gate iteration would otherwise be a published behaviour change.
 
-**The diff:** `git-clean-stop` and `plugin-version-guard` merge into a single
-repo-guard plugin, with the two old names kept as aliases pointing at the merged
-directory.
+---
 
-**Outcome:** Option 1's end state, minus one line in this repo's
-`.claude/settings.json`. Both old `@zabaca-agent-tools` identifiers keep resolving
-indefinitely, at no token cost and with no doubled hook firing.
+## Fork points — variants pending
 
-**Impact:** one directory merge, two alias entries in `marketplace.json`, and this
-repo's settings updated. cedarpad is untouched. Effort: an hour on top of Option 1.
-Reversible, though unwinding the alias is awkward — the CLI addresses plugins by
-manifest name, so the alias name is not addressable by `details` or `uninstall`.
+| | Pinned in Option 1 | Alternative to be grilled |
+| --- | --- | --- |
+| FP1 | Fix the broken trio and keep the code | Delete the three directories outright, as `pm-agent` was |
+| FP2 | A hard-failing pre-commit gate | No gate — validation is a command run by hand |
+| FP3 | Unlist only what is broken (12 entries) | Unlist everything enabled nowhere (8 entries) |
 
-**Pros**
-- It is the only merge whose inherited hooks are the product rather than a side
-  effect: a kit that means "hold this repo to a standard" is *bought* for its hooks.
-- The two members are already co-enabled in the one repo that would install it.
-- Aliasing makes it a soft migration — tested, not assumed.
+Credit already owed to FP1's alternative: deleting the trio dissolves the
+exception list entirely. "Anything in `plugins/` without an entry is an error"
+becomes enforceable with no `.plugin-gate.json` and no question about who owns
+repo-specific state — a real architectural simplification this option cannot have.
 
-**Cons**
-- Marginal value is one fewer install line in one repo, against a merge, an alias,
-  and a permanently non-addressable alias name.
-- Combining with Option 2 rather than Option 1 is coherent but odd: the kit ships a
-  version-guard scaffolder to other people while you keep enforcing it here by hand.
-- The kit wanted a third member — `claude-config-lint` — and could not have one
-  without contradicting the decision to unlist the dead set. A kit that needs a
-  third member to feel like a kit is a rationalization.
-- Its only named consumer has already installed both members. A kit is a
-  convenience for a *future* installer, and the one install line it saves is
-  already written.
+FP2's alternative is not laziness: a repo whose three consumers are all yours may
+not need a robot to stop you committing, and the gate is friction measured against
+a metric that wanted less of it.
 
-**Wrong if:** no second repo is going to adopt the hygiene hooks. This option rests
-entirely on a fact about your intentions that the repo cannot answer — if cedarpad
-(or a next project) will take the guards, the kit is justified; if the consumer base
-stays one settings file that is already correct, this is a net-negative refactor and
-belongs in the eliminated table with the other two kits.
-
-**Close call:** whether the guard kit is worth doing at all was the last live
-question in the grilling, and it survived on one argument — that hook inheritance is
-legitimate when the hooks *are* the product.
-
-## Comparison
-
-| | Option 1 — Honest list | Option 2 — Released toolkit | Option 3 — plus guard kit |
-| --- | --- | --- | --- |
-| Marketplace entries | 8 | 8 | 7 + 2 aliases |
-| Per-commit friction | gate only | gate + bump + changelog | gate only |
-| New files to maintain | 1 gate script | 1 gate script + 8 changelogs | 1 gate script |
-| Consumer-visible change | none | none | identifiers merge (aliased) |
-| Effort | hours | ~a day, plus recurring | hours + ~1h |
-| Reversibility | full | full, changelogs rot | awkward alias unwind |
-
-## Eliminated, with the question that killed each
-
-| Eliminated | Killed by |
-| --- | --- |
-| Worktree kit (`worktree-tickets` + `create-worktree-friendly` + `orchestrator`) | An alias redirects rather than preserves, so cedarpad's checked-in key would silently start loading a `PreToolUse` hook it never asked for |
-| CLI kit (`x-cli` + `google-cli` + `gemini-image`) | Three inherited `SessionStart` hooks for anyone who wanted one skill — and all three are in the dead set anyway |
-| Shared-plumbing dedup | Its only instances are the three plugins every option unlists; no live beneficiary remains |
-| "Reduce always-on token cost" as the driver | No project enables more than three of these at once; there is no context tax to relieve |
-
-## Recommendation
-
-**Option 1.**
-
-The grilling changed what the question was. "Consolidate plugins" implied merging
-directories or deduping code, and both died on their own merits — hooks make kits
-coercive, and the only duplicated code belongs to plugins nobody runs. What is
-actually consolidatable is the marketplace's honesty: its list, its descriptions,
-its README, and what checks them.
-
-Option 2 loses to Option 1 because the only bump rule the existing script can
-enforce is the one that carries no information, which makes the real deliverable a
-hand-written changelog for an audience of your own three repos — and this repo has
-four months of evidence about hand-maintained prose.
-
-Option 3 is defensible and cheap, but it is an increment on Option 1 rather than a
-rival to it, and its marginal value is one install line.
-
-**What would change my mind:** evidence of real external consumers. If someone other
-than you installs from this marketplace, Option 2's version channel stops being
-ceremony and Option 3's identifier merge stops being cheap. The 12 clones / 10
-uniques in the last 14 days are consistent with Claude Code's own marketplace
-fetches, but they are not proof of absence.
-
-## Open close calls
-
-- Native `claude plugin validate` vs this repo's `claude-config-lint` as the gate's
-  engine.
-- Fully generated README vs a generated index with hand-written prose per plugin.
-- One marketplace vs splitting along the hooks-versus-skills seam. This was closed on
-  the fork budget, not on the merits, and it is the close call most worth reopening:
-  the grilling rediscovered that seam three separate times, because hooks are exactly
-  what cannot be safely merged and skills are exactly what can. If this marketplace
-  ever splits, that is the line. Answered as one marketplace because a split doubles
-  `marketplace add` friction across your own repos.
-- Whether `orchestrator` belongs in the dead set. One history mention, no
-  enablement.
+Variants 2–4 to follow, one at a time. The comparison table and recommendation are
+written once every variant is grilled to an empty frontier.
