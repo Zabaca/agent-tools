@@ -1,0 +1,7 @@
+{
+  "name": "connect-fredrin",
+  "version": "0.1.0",
+  "description": "Wire Fredrin into a repo that already has Matt Pocock's engineering-skill setup, pointing Fredrin's memory folder and issue tracker at the repo's existing docs layout.",
+  "author": { "name": "Zabaca" },
+  "skills": ["./skills/connect-fredrin"]
+}

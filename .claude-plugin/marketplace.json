@@ -97,6 +97,12 @@
       "description": "Work a dependency-ordered ticket backlog to done \u2014 resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
       "version": "0.1.0",
       "source": "./plugins/ship"
+    },
+    {
+      "name": "connect-fredrin",
+      "description": "Wire Fredrin into a repo that already has Matt Pocock's engineering-skill setup, pointing Fredrin's memory folder and issue tracker at the repo's existing docs layout.",
+      "version": "0.1.0",
+      "source": "./plugins/connect-fredrin"
     }
   ]
 }
