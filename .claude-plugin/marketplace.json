@@ -97,6 +97,12 @@
       "description": "Work a dependency-ordered ticket backlog to done \u2014 resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
       "version": "0.1.0",
       "source": "./plugins/ship"
+    },
+    {
+      "name": "grill-options",
+      "description": "An inverted grilling session: a subagent grills Claude about a plan, Claude answers from the codebase and forks the design tree at every genuine value tradeoff, and the user is handed 2-4 fully-grilled options with impact, outcome, and pros/cons to pick from.",
+      "version": "0.3.0",
+      "source": "./plugins/grill-options"
     }
   ]
 }
