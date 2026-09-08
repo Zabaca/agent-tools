@@ -103,6 +103,12 @@
       "description": "Wire Fredrin into a repo that already has Matt Pocock's engineering-skill setup, pointing Fredrin's memory folder and issue tracker at the repo's existing docs layout.",
       "version": "0.1.0",
       "source": "./plugins/connect-fredrin"
+    },
+    {
+      "name": "grill-options",
+      "description": "An inverted grilling session: a subagent grills Claude about a plan, Claude answers from the codebase and forks the design tree at every genuine value tradeoff, and the user is handed 2-4 fully-grilled options with impact, outcome, and pros/cons to pick from.",
+      "version": "0.3.0",
+      "source": "./plugins/grill-options"
     }
   ]
 }

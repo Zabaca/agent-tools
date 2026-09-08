@@ -5,3 +5,9 @@ dist/
 .DS_Store
 .idea/
 .claude/worktrees/
+
+# local dev: symlinked skills for iterating without reinstalling the plugin
+.claude/skills/
+
+# local machine-specific permissions
+.claude/settings.local.json
