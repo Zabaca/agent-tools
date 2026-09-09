@@ -32,10 +32,11 @@ The run is hands-off. You are not interrupted between kickoff and the options.
 
 ## What it writes
 
-- `docs/options/<slug>.md` — written during the run, one section per branch as
-  that branch finishes.
+- `<scratch>/options-<slug>.md` — written during the run, one section per branch
+  as that branch finishes. Scratch, not the repo: it is working material for an
+  undecided question, so it never gets committed.
 - `docs/adr/…` — written **after** you pick, with the rejected options as the
-  alternatives-considered section.
+  alternatives-considered section. The only file it adds to the repo.
 
 Nothing else. It does not touch `CONTEXT.md`.
 

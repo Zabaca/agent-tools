@@ -161,9 +161,15 @@ consume a slot; move to the next fork point.
 
 ## The options document
 
-Write `docs/options/<slug>.md` **during** the run — one section per branch, filled
-in as that branch completes, not batched at the end. Then report the same content
-in the terminal.
+Write `<scratch>/options-<slug>.md` **during** the run — one section per branch,
+filled in as that branch completes, not batched at the end. Then report the same
+content in the terminal.
+
+`<scratch>` is the session scratchpad directory named in your environment. If
+there is none, use a gitignored `.scratch/` at the repo root, and add it to
+`.gitignore` if it is not already there. This document is working material for a
+decision that has not been made yet — it must never land in a commit. Only the
+ADR, written after the pick, belongs in the repo.
 
 Per option:
 
@@ -197,8 +203,10 @@ The user chooses. Then:
    analysis, not straw men.
 2. Hand off: `to-spec` if the change is large, `implement` if it is small.
 
-Do not touch `CONTEXT.md`, and do not write anything else to the repo. Options
-doc and ADR only.
+Do not touch `CONTEXT.md`. The ADR is the *only* thing this skill writes into
+the repo; everything else stays in scratch. If the user wants the options
+document kept, they will say so — then copy it out of scratch on their word,
+not by default.
 
 ## The grilling agent's contract
 
