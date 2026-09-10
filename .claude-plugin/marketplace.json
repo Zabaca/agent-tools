@@ -133,6 +133,12 @@
       "description": "Three-test TDD pattern (green-contract, red-exploit, green-fix) for security findings and regression-prone refactors.",
       "version": "0.1.0",
       "source": "./plugins/security-tdd"
+    },
+    {
+      "name": "stream-kit",
+      "description": "Build-in-public streaming kit: configure a repo for streaming, then go live with a board-derived title, description, tags, and a restarted overlay.",
+      "version": "0.1.0",
+      "source": "./plugins/stream-kit"
     }
   ]
 }
