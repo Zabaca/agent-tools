@@ -1,0 +1,359 @@
+<style>
+  :root{
+    --ink:#141821; --mute:#5d6675; --faint:#8791a1;
+    --paper:#ffffff; --wash:#f6f8fc;
+    --g1:#eef2f9; --g1s:#d3dced;
+    --g2:#f7f9fd; --g2s:#dde4f0;
+    --edge:#7b8798; --edgeStrong:#3f4a5c;
+    --deny:#b3392f;
+    --plain:#243447; --plainS:#5b9dc9;
+    --sand:#1f3a4d; --sandS:#5b9dc9;
+    --cred:#7a2d2d; --credS:#c76b6b;
+    --iam:#4a3a1f;  --iamS:#c9a75b;
+    --ext:#2f2f33;  --extS:#8a8a92;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+       font:14px/1.45 ui-sans-serif,-apple-system,"Segoe UI",Inter,Helvetica,Arial,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{padding:22px 26px 26px}
+
+  header{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;
+         border-bottom:1px solid #e6eaf1;padding-bottom:14px;margin-bottom:16px}
+  h1{margin:0;font-size:21px;letter-spacing:-.015em;font-weight:640}
+  h1 small{display:block;font-size:12.5px;font-weight:450;color:var(--mute);margin-top:5px;letter-spacing:0}
+  .tags{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:560;padding:4px 9px;border-radius:999px;
+       background:var(--g1);color:#41506a;border:1px solid var(--g1s);white-space:nowrap}
+  .tag.live{background:#e8f4ec;border-color:#bcdcc7;color:#22603a}
+
+  svg{display:block;width:100%;height:auto}
+
+  .foot{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px;
+        border-top:1px solid #e6eaf1;padding-top:15px}
+  .foot h4{margin:0 0 6px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint);font-weight:640}
+  .foot p{margin:0 0 7px;font-size:12px;color:#3c4553}
+  .foot b{font-weight:620;color:var(--ink)}
+  code{font:11.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;
+       background:var(--g1);padding:1px 4px;border-radius:3px;color:#2c3648}
+
+  .key{display:flex;gap:14px;flex-wrap:wrap;margin-top:2px}
+  .key span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#3c4553}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Henry in the cluster — as deployed
+      <small>nix-v20 + listener-v1 · verified in-cluster 2026-08-20 · drawn from the applied terraform, not from the plan</small>
+    </h1>
+    <div class="tags">
+      <span class="tag live">3 pods · 3 CiliumNetworkPolicies</span>
+      <span class="tag">agent pod still named <b>henry-slack</b></span>
+      <span class="tag">20 proxy upstreams · one shared config.yaml</span>
+    </div>
+  </header>
+
+<svg viewBox="0 0 1900 985" role="img" aria-label="Henry deployment topology">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7b8798"/></marker>
+    <marker id="aS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3f4a5c"/></marker>
+    <marker id="aD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b3392f"/></marker>
+    <filter id="sh" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#16233d" flood-opacity=".20"/></filter>
+    <style>
+      .gl{font:600 12px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#46536b;letter-spacing:.02em}
+      .gs{font:400 10.5px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#7c879a}
+      .nt{font:600 12.5px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#fff}
+      .ns{font:400 10.5px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#c9d6e6}
+      .el{font:500 10.5px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#5a6577}
+      .elb{font:600 10.5px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#3f4a5c}
+      .deny{font:600 10.5px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#b3392f}
+      .note{font:400 10px ui-sans-serif,-apple-system,"Segoe UI",Inter,sans-serif;fill:#8791a1}
+    </style>
+  </defs>
+
+  <!-- ================= group frames ================= -->
+  <rect x="24"   y="362" width="200"  height="180" rx="10" fill="#f7f9fd" stroke="#dde4f0"/>
+  <text class="gl" x="124" y="384" text-anchor="middle">Slack</text>
+
+  <rect x="248"  y="8"   width="1180" height="930" rx="12" fill="#f9fbfe" stroke="#dde4f0"/>
+  <text class="gl" x="266" y="30">AWS 987691524571 · us-east-2</text>
+
+  <rect x="264"  y="44"  width="1148" height="700" rx="11" fill="#f4f7fc" stroke="#d3dced"/>
+  <text class="gl" x="282" y="66">EKS · uat-primary</text>
+
+  <rect x="280"  y="80"  width="1116" height="648" rx="10" fill="#eef2f9" stroke="#ccd7ea"/>
+  <text class="gl" x="298" y="101">namespace henry-slack</text>
+  <text class="gs" x="298" y="116">3 CiliumNetworkPolicies · linkerd-meshed · every pod at 1 replica</text>
+
+  <!-- pods -->
+  <rect x="296"  y="362" width="200"  height="180" rx="9" fill="#fdfefe" stroke="#c3d0e4"/>
+  <text class="gl" x="312" y="384">pod henry-listener</text>
+  <text class="gs" x="312" y="399">listener-v1 · slack.com only</text>
+
+  <rect x="516"  y="122" width="420"  height="580" rx="9" fill="#fdfefe" stroke="#c3d0e4"/>
+  <text class="gl" x="532" y="144">pod henry-slack — the AGENT</text>
+  <text class="gs" x="532" y="159">nix-v20 · 6.58GB · CNP: proxy only, no external egress</text>
+
+  <rect x="956"  y="232" width="424"  height="380" rx="9" fill="#fdfefe" stroke="#c3d0e4"/>
+  <text class="gl" x="972" y="254">pod henry-proxy</text>
+  <text class="gs" x="972" y="269">henry-proxy-aws-1 · CNP: toEntities world, scoped here only</text>
+
+  <!-- AWS non-EKS -->
+  <rect x="264"  y="768" width="560"  height="150" rx="10" fill="#f4f7fc" stroke="#d3dced"/>
+  <text class="gl" x="282" y="790">IAM</text>
+  <rect x="852"  y="768" width="560"  height="150" rx="10" fill="#f4f7fc" stroke="#d3dced"/>
+  <text class="gl" x="870" y="790">AWS APIs the agent can reach</text>
+
+  <!-- third party -->
+  <rect x="1452" y="44"  width="424"  height="470" rx="11" fill="#f4f7fc" stroke="#d3dced"/>
+  <text class="gl" x="1470" y="66">Outside the account — proxy only</text>
+  <text class="gs" x="1470" y="81">20 upstreams, from the one checked-in config.yaml</text>
+
+  <rect x="1452" y="546" width="424"  height="246" rx="11" fill="#fdf5f4" stroke="#eccbc7"/>
+  <text class="gl" x="1470" y="568" style="fill:#9c3b31">What the agent cannot reach</text>
+
+  <!-- ================= edges (drawn under nodes) ================= -->
+  <!-- slack <-> listener -->
+  <path d="M208 466 H306" stroke="#3f4a5c" stroke-width="2.4" fill="none" marker-end="url(#aS)" marker-start="url(#aS)"/>
+  <text class="elb" x="257" y="452" text-anchor="middle">direct</text>
+  <text class="el"  x="257" y="490" text-anchor="middle">NO_PROXY · 200</text>
+
+  <!-- listener -> api -->
+  <path d="M480 466 H498 V208 H526" stroke="#3f4a5c" stroke-width="2.4" fill="none" marker-end="url(#aS)"/>
+
+  <!-- api -> sandbox agent -->
+  <path d="M627 240 V286 H638 V310" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <text class="el" x="652" y="262">spawns per turn</text>
+
+  <!-- api <-> store -->
+  <path d="M722 208 H734" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)" marker-start="url(#a)"/>
+
+  <!-- agent -> inner relay -->
+  <path d="M638 386 V416" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <!-- helper -> inner relay -->
+  <path d="M824 386 V416" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+
+  <!-- inner -> outer -->
+  <path d="M860 476 V588" stroke="#3f4a5c" stroke-width="2.4" fill="none" marker-end="url(#aS)"/>
+
+  <!-- outer -> proxy pod (round the bottom) -->
+  <path d="M726 652 V688 H1250 V368" stroke="#3f4a5c" stroke-width="2.4" fill="none" marker-end="url(#aS)"/>
+
+  <!-- proxy -> broker -->
+  <path d="M1067 362 V394" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+
+  <!-- proxy -> third party -->
+  <path d="M1364 306 H1446" stroke="#3f4a5c" stroke-width="2.4" fill="none" marker-end="url(#aS)"/>
+
+  <!-- broker -> IAM -->
+  <path d="M1067 460 V756 H544 V762" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+  <!-- IAM -> AWS APIs -->
+  <path d="M824 843 H846" stroke="#7b8798" stroke-width="1.5" fill="none" marker-end="url(#a)"/>
+
+  <!-- proxy -> eks api (dashed) -->
+  <path d="M1364 430 H1400 V728 H1180 V762" stroke="#7b8798" stroke-width="1.4" fill="none"
+        stroke-dasharray="5 4" marker-end="url(#a)"/>
+
+  <!-- DENIED: agent -> slack.com -->
+  <path d="M516 620 H444" stroke="#b3392f" stroke-width="1.6" fill="none" stroke-dasharray="5 4"/>
+  <path d="M438 613 l-11 14 M427 613 l11 14" stroke="#b3392f" stroke-width="2.2" fill="none"/>
+
+  <!-- ================= nodes ================= -->
+  <!-- slack -->
+  <g filter="url(#sh)"><rect x="40" y="416" width="168" height="100" rx="9" fill="#2f2f33" stroke="#8a8a92"/></g>
+  <text class="nt" x="124" y="452" text-anchor="middle">Slack</text>
+  <text class="ns" x="124" y="472" text-anchor="middle">Socket Mode</text>
+  <text class="ns" x="124" y="490" text-anchor="middle">chat.postMessage</text>
+  <text class="ns" x="124" y="506" text-anchor="middle">chat.update</text>
+
+  <!-- listener -->
+  <g filter="url(#sh)"><rect x="312" y="416" width="168" height="100" rx="9" fill="#7a2d2d" stroke="#c76b6b"/></g>
+  <text class="nt" x="396" y="446" text-anchor="middle">listener.ts · PID 1</text>
+  <text class="ns" x="396" y="468" text-anchor="middle">SLACK_APP_TOKEN</text>
+  <text class="ns" x="396" y="484" text-anchor="middle">SLACK_BOT_TOKEN</text>
+  <text class="ns" x="396" y="504" text-anchor="middle">dedupe · ThreadQueue</text>
+
+  <!-- the /turn label block -->
+  <rect x="300" y="226" width="182" height="74" rx="7" fill="#ffffff" stroke="#dde4f0"/>
+  <text class="elb" x="313" y="247">POST /turn — NDJSON</text>
+  <text class="el"  x="313" y="265">heartbeat every 10s,</text>
+  <text class="el"  x="313" y="281">then one result · mTLS</text>
+  <text class="note" x="313" y="320">a &gt;60s turn survives this</text>
+
+  <!-- api + store -->
+  <g filter="url(#sh)"><rect x="532" y="176" width="190" height="64" rx="8" fill="#243447" stroke="#5b9dc9"/></g>
+  <text class="nt" x="627" y="200" text-anchor="middle">agent-server.ts :3000</text>
+  <text class="ns" x="627" y="222" text-anchor="middle">server.timeout(req, 0)</text>
+
+  <g filter="url(#sh)"><rect x="734" y="176" width="186" height="64" rx="8" fill="#243447" stroke="#5b9dc9"/></g>
+  <text class="nt" x="827" y="198" text-anchor="middle">SessionStore · /data</text>
+  <text class="ns" x="827" y="219" text-anchor="middle">emptyDir — resume dies</text>
+  <text class="ns" x="827" y="234" text-anchor="middle">on restart</text>
+
+  <!-- sandbox frame -->
+  <rect x="532" y="274" width="388" height="290" rx="9" fill="#eaf1f7" stroke="#a9c4da" stroke-dasharray="6 4"/>
+  <text class="gl" x="548" y="295" style="fill:#2f5c7d">bwrap sandbox</text>
+  <text class="gs" x="548" y="309" style="fill:#5b7f9c">--unshare-net · --clearenv · netns has only lo</text>
+
+  <g filter="url(#sh)"><rect x="548" y="316" width="180" height="70" rx="8" fill="#1f3a4d" stroke="#5b9dc9"/></g>
+  <text class="nt" x="638" y="342" text-anchor="middle">claude CLI</text>
+  <text class="ns" x="638" y="362" text-anchor="middle">writable /work</text>
+  <text class="ns" x="638" y="377" text-anchor="middle">bound over /app/repo</text>
+
+  <g filter="url(#sh)"><rect x="744" y="316" width="160" height="70" rx="8" fill="#1f3a4d" stroke="#5b9dc9"/></g>
+  <text class="nt" x="824" y="342" text-anchor="middle">credential_process</text>
+  <text class="ns" x="824" y="364" text-anchor="middle">holds nothing —</text>
+  <text class="ns" x="824" y="379" text-anchor="middle">asks the broker</text>
+
+  <text class="el" x="548" y="408">https_proxy 127.0.0.1:18080</text>
+  <text class="el" x="904" y="408" text-anchor="end">broker :8181</text>
+
+  <g filter="url(#sh)"><rect x="548" y="416" width="356" height="60" rx="8" fill="#1f3a4d" stroke="#5b9dc9"/></g>
+  <text class="nt" x="726" y="440" text-anchor="middle">relay (inner) · t2u :18080</text>
+  <text class="ns" x="726" y="462" text-anchor="middle">TCP in → unix socket out</text>
+
+  <text class="note" x="548" y="504">No UDP inside, so no DNS.</text>
+  <text class="note" x="548" y="520">Every hostname is resolved by the proxy,</text>
+  <text class="note" x="548" y="536">on the far side of the socket.</text>
+
+  <!-- outer relay -->
+  <g filter="url(#sh)"><rect x="532" y="588" width="388" height="64" rx="8" fill="#1f3a4d" stroke="#5b9dc9"/></g>
+  <text class="nt" x="726" y="613" text-anchor="middle">relay (outer) · u2t</text>
+  <text class="ns" x="726" y="635" text-anchor="middle">/tmp/sandbox/px.sock</text>
+
+  <text class="deny" x="436" y="608" text-anchor="end">slack.com</text>
+  <text class="deny" x="436" y="640" text-anchor="end">TLS fails · curl exit 56</text>
+
+  <text class="elb" x="968" y="676">unix socket — the only route out of the sandbox</text>
+
+  <!-- proxy -->
+  <g filter="url(#sh)"><rect x="972" y="286" width="392" height="76" rx="8" fill="#7a2d2d" stroke="#c76b6b"/></g>
+  <text class="nt" x="1168" y="312" text-anchor="middle">henry-proxy :8080 — MITM</text>
+  <text class="ns" x="1168" y="333" text-anchor="middle">holds the real tokens · injects per upstream</text>
+  <text class="ns" x="1168" y="350" text-anchor="middle">refuses a host in findMapping before it dials</text>
+
+  <g filter="url(#sh)"><rect x="972" y="394" width="190" height="66" rx="8" fill="#7a2d2d" stroke="#c76b6b"/></g>
+  <text class="nt" x="1067" y="420" text-anchor="middle">broker :8181</text>
+  <text class="ns" x="1067" y="441" text-anchor="middle">/aws-creds</text>
+
+  <text class="note" x="1180" y="414">config.yaml is a byte copy of</text>
+  <text class="note" x="1180" y="430">the dev shell's own file — one</text>
+  <text class="note" x="1180" y="446">list, so it cannot drift.</text>
+  <text class="note" x="1180" y="470">There is no slack.com entry,</text>
+  <text class="note" x="1180" y="486">and a plan-time validation</text>
+  <text class="note" x="1180" y="502">fails if anyone adds one.</text>
+
+  <!-- IAM -->
+  <g filter="url(#sh)"><rect x="284" y="810" width="248" height="82" rx="8" fill="#4a3a1f" stroke="#c9a75b"/></g>
+  <text class="nt" x="408" y="838" text-anchor="middle">ServiceAccount role · IRSA</text>
+  <text class="ns" x="408" y="860" text-anchor="middle">AssumeRole, nothing else</text>
+  <text class="ns" x="408" y="877" text-anchor="middle">never reaches the sandbox</text>
+
+  <g filter="url(#sh)"><rect x="552" y="810" width="252" height="82" rx="8" fill="#4a3a1f" stroke="#c9a75b"/></g>
+  <text class="nt" x="678" y="838" text-anchor="middle">henry-slack-agent</text>
+  <text class="ns" x="678" y="860" text-anchor="middle">HenryPolicy · 900s</text>
+  <text class="ns" x="678" y="877" text-anchor="middle">what Henry actually is</text>
+
+  <text class="el" x="700" y="747" text-anchor="start">broker mints credentials — IRSA never crosses into the sandbox</text>
+
+  <!-- AWS APIs -->
+  <g filter="url(#sh)"><rect x="870" y="810" width="150" height="82" rx="8" fill="#4a3a1f" stroke="#c9a75b"/></g>
+  <text class="nt" x="945" y="840" text-anchor="middle">sts</text>
+  <text class="ns" x="945" y="862" text-anchor="middle">get-caller-identity</text>
+
+  <g filter="url(#sh)"><rect x="1036" y="810" width="184" height="82" rx="8" fill="#4a3a1f" stroke="#c9a75b"/></g>
+  <text class="nt" x="1128" y="838" text-anchor="middle">EKS API</text>
+  <text class="ns" x="1128" y="860" text-anchor="middle">read-only, this</text>
+  <text class="ns" x="1128" y="877" text-anchor="middle">namespace only</text>
+
+  <g filter="url(#sh)"><rect x="1236" y="810" width="160" height="82" rx="8" fill="#4a3a1f" stroke="#c9a75b"/></g>
+  <text class="nt" x="1316" y="838" text-anchor="middle">s3</text>
+  <text class="ns" x="1316" y="860" text-anchor="middle">ListAllMyBuckets</text>
+  <text class="ns" x="1316" y="877" text-anchor="middle">only — no objects</text>
+
+  <text class="el" x="1396" y="714" text-anchor="end">aws eks get-token · upstream CA from the ConfigMap</text>
+
+  <!-- third party -->
+  <g filter="url(#sh)"><rect x="1472" y="96" width="384" height="66" rx="8" fill="#2f2f33" stroke="#8a8a92"/></g>
+  <text class="nt" x="1492" y="122">api.anthropic.com</text>
+  <text class="ns" x="1492" y="144">the turn itself · token injected by the proxy</text>
+
+  <g filter="url(#sh)"><rect x="1472" y="176" width="384" height="82" rx="8" fill="#2f2f33" stroke="#8a8a92"/></g>
+  <text class="nt" x="1492" y="202">Salesforce — BetrLink UAT</text>
+  <text class="ns" x="1492" y="224">OAuth client_credentials done by the proxy;</text>
+  <text class="ns" x="1492" y="241">Henry holds no Salesforce credential at all</text>
+
+  <g filter="url(#sh)"><rect x="1472" y="272" width="384" height="66" rx="8" fill="#2f2f33" stroke="#8a8a92"/></g>
+  <text class="nt" x="1492" y="298">api.exa.ai</text>
+  <text class="ns" x="1492" y="320">web search · placeholder key swapped in flight</text>
+
+  <g filter="url(#sh)"><rect x="1472" y="352" width="384" height="66" rx="8" fill="#2f2f33" stroke="#8a8a92"/></g>
+  <text class="nt" x="1492" y="378">us.cloud.langfuse.com</text>
+  <text class="ns" x="1492" y="400">reachable — but pod turns are not traced</text>
+
+  <text class="note" x="1472" y="444">Plus 16 more: the Claude login domains, the</text>
+  <text class="note" x="1472" y="460">headroom loopback, two pinned file paths, and</text>
+  <text class="note" x="1472" y="476">the scratch-org wildcard. Most are inert here.</text>
+
+  <!-- cannot reach -->
+  <text class="deny" x="1472" y="596">✗  slack.com</text>
+  <text class="note" x="1500" y="613">CONNECT tunnel failed, 403 — this is finding S1</text>
+  <text class="deny" x="1472" y="641">✗  github.com</text>
+  <text class="note" x="1500" y="658">no route; the git remote is a file:// path, frozen at build</text>
+  <text class="deny" x="1472" y="686">✗  anything not among the 20</text>
+  <text class="note" x="1500" y="703">example.com returns 403 from the proxy</text>
+  <text class="deny" x="1472" y="731">✗  other namespaces, secrets, pods/exec</text>
+  <text class="note" x="1500" y="748">Forbidden by RBAC, proven rather than assumed</text>
+
+  <!-- how a turn flows: fills the empty lower-left -->
+  <text class="gl" x="24" y="596">How one turn flows</text>
+  <g class="note" font-size="10.5">
+    <text x="24" y="622"><tspan class="elb">1</tspan>  Slack event reaches the listener</text>
+    <text x="24" y="638">   over Socket Mode. No proxy.</text>
+    <text x="24" y="666"><tspan class="elb">2</tspan>  Listener POSTs /turn and holds</text>
+    <text x="24" y="682">   the stream open, heartbeat 10s.</text>
+    <text x="24" y="710"><tspan class="elb">3</tspan>  Agent spawns claude inside bwrap,</text>
+    <text x="24" y="726">   one fresh netns per turn.</text>
+    <text x="24" y="754"><tspan class="elb">4</tspan>  Every request it makes leaves by</text>
+    <text x="24" y="770">   the socket. There is no other way.</text>
+    <text x="24" y="798"><tspan class="elb">5</tspan>  Proxy checks the host, injects the</text>
+    <text x="24" y="814">   real credential, then dials.</text>
+    <text x="24" y="842"><tspan class="elb">6</tspan>  Result streams back; the listener</text>
+    <text x="24" y="858">   edits its placeholder message.</text>
+  </g>
+
+  <!-- footnote inside svg -->
+  <text class="note" x="24" y="960">Two gates in series: Cilium lets the PROXY POD reach the world, and the proxy refuses a host before it dials. The agent pod matches no egress policy and its netns has only lo.</text>
+</svg>
+
+  <div class="foot">
+    <div>
+      <h4>Read it in one line</h4>
+      <p>Slack talks only to the <b>listener</b>. The listener streams a turn to the <b>agent</b>, which has no network at all — its only exit is a unix socket to the <b>proxy</b>, which holds every real credential.</p>
+    </div>
+    <div>
+      <h4>Why the relay exists</h4>
+      <p>The laptop sandbox uses <code>pasta</code>, which needs <code>/dev/net/tun</code>. A pod running non-root with all capabilities dropped cannot have one. So the pod uses <code>--unshare-net</code> plus a socket — a different architecture, and a stronger one.</p>
+    </div>
+    <div>
+      <h4>The name is wrong, deliberately</h4>
+      <p>The agent pod is still <code>henry-slack</code> although it holds zero Slack tokens and cannot reach slack.com. Renaming it to <code>henry-agent</code> is written and committed, not yet applied.</p>
+    </div>
+    <div>
+      <h4>Known gaps</h4>
+      <p><b>Resume dies on an agent restart</b> — <code>/data</code> is an emptyDir. <b>No Go or node builds</b> — no module cache, no <code>node_modules</code> in the sandbox. <b>No tracing</b> — langfuse hooks are stripped at build.</p>
+      <div class="key">
+        <span><i class="sw" style="background:#7a2d2d"></i>holds a real secret</span>
+        <span><i class="sw" style="background:#1f3a4d"></i>inside the sandbox</span>
+        <span><i class="sw" style="background:#243447"></i>pod process</span>
+        <span><i class="sw" style="background:#4a3a1f"></i>AWS identity</span>
+        <span><i class="sw" style="background:#2f2f33"></i>outside</span>
+      </div>
+    </div>
+  </div>
+</div>

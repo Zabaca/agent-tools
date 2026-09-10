@@ -4,13 +4,13 @@
     "name": "Zabaca"
   },
   "metadata": {
-    "description": "CLI tools for Claude Code \u2014 Twitter, Google Workspace, Image Generation",
+    "description": "CLI tools for Claude Code — Twitter, Google Workspace, Image Generation",
     "pluginRoot": "./plugins"
   },
   "plugins": [
     {
       "name": "visual-mode",
-      "description": "Visual output surface for agents \u2014 scaffolds a local astro app (.visual-mode/) rendering responses as browsable MDX panes plus full-bleed lab pages, with a /visual-mode skill that starts the dev server and teaches the conventions.",
+      "description": "Visual output surface for agents — scaffolds a local astro app (.visual-mode/) rendering responses as browsable MDX panes plus full-bleed lab pages, with a /visual-mode skill that starts the dev server and teaches the conventions.",
       "version": "0.1.0",
       "source": "./plugins/visual-mode"
     },
@@ -76,7 +76,7 @@
     },
     {
       "name": "red-sweep",
-      "description": "TDD-based issue discovery \u2014 find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
+      "description": "TDD-based issue discovery — find bugs, security holes, and code quality issues by writing failing tests that prove problems exist",
       "version": "1.0.0",
       "source": "./plugins/red-sweep"
     },
@@ -88,14 +88,14 @@
     },
     {
       "name": "machine-first-prototype",
-      "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways \u2014 bare functional, designed, and a state explorer covering every reachable state.",
+      "description": "Turn screenshots of an app into a working prototype by modelling its state machines first, verifying them headlessly, then rendering three ways — bare functional, designed, and a state explorer covering every reachable state.",
       "version": "0.1.0",
       "source": "./plugins/machine-first-prototype"
     },
     {
       "name": "ship",
-      "description": "Work a dependency-ordered ticket backlog to done \u2014 resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
-      "version": "0.1.0",
+      "description": "Work a dependency-ordered ticket backlog to done — resolve the DAG frontier, dispatch implementer sub-agents, run an independent two-axis review, drive bounded fix rounds, merge, then start the next ticket.",
+      "version": "0.2.0",
       "source": "./plugins/ship"
     },
     {
@@ -109,6 +109,30 @@
       "description": "An inverted grilling session: a subagent grills Claude about a plan, Claude answers from the codebase and forks the design tree at every genuine value tradeoff, and the user is handed 2-4 fully-grilled options with impact, outcome, and pros/cons to pick from.",
       "version": "0.3.0",
       "source": "./plugins/grill-options"
+    },
+    {
+      "name": "architecture-diagram",
+      "description": "Draw a presentation-quality architecture or system diagram as hand-laid-out SVG, verified by rendering it in headless Chrome.",
+      "version": "0.1.0",
+      "source": "./plugins/architecture-diagram"
+    },
+    {
+      "name": "ast-grep",
+      "description": "Use ast-grep (sg) for structural code search and rewrite when regex would miss context or match too much.",
+      "version": "0.1.0",
+      "source": "./plugins/ast-grep"
+    },
+    {
+      "name": "branch-impact",
+      "description": "Assess a branch or working tree against main and report outcome, impact, and risk via an independent read-only assessor that baseline-tests every risk.",
+      "version": "0.1.0",
+      "source": "./plugins/branch-impact"
+    },
+    {
+      "name": "security-tdd",
+      "description": "Three-test TDD pattern (green-contract, red-exploit, green-fix) for security findings and regression-prone refactors.",
+      "version": "0.1.0",
+      "source": "./plugins/security-tdd"
     }
   ]
 }

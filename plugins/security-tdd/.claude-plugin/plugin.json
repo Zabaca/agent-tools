@@ -1,0 +1,8 @@
+{
+  "name": "security-tdd",
+  "version": "0.1.0",
+  "description": "Three-test TDD pattern (green-contract, red-exploit, green-fix) for security findings and regression-prone refactors.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["tdd", "security", "testing"],
+  "skills": "./skills/"
+}

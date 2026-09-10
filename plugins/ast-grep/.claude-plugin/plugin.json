@@ -1,0 +1,8 @@
+{
+  "name": "ast-grep",
+  "version": "0.1.0",
+  "description": "Use ast-grep (sg) for structural code search and rewrite when regex would miss context or match too much.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["ast-grep", "search", "refactor", "ast"],
+  "skills": "./skills/"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "architecture-diagram",
+  "version": "0.1.0",
+  "description": "Draw a presentation-quality architecture or system diagram as hand-laid-out SVG, verified by rendering it in headless Chrome.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["diagram", "svg", "architecture", "chrome"],
+  "skills": "./skills/"
+}

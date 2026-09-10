@@ -16,25 +16,50 @@ Read `docs/agents/issue-tracker.md` for tracker commands, and `CONTEXT.md` plus
 `docs/adr/` for vocabulary and constraints. If the tracker doc is missing, run
 `/setup-matt-pocock-skills` first.
 
+**That doc decides the commands below, not the `gh` examples.** Every `gh` line
+here is the GitHub Issues case, written out because it is the common one. Where
+the tracker doc names its own commands, those win, and do not fall back to `gh`:
+a repo with a GitHub remote whose tracker is not GitHub Issues is exactly the
+case where `gh` succeeds against the wrong tracker. Three operations need
+translating: resolve the frontier, claim, and close with a comment.
+
 ## 1. Resolve the frontier
 
 A ticket is **ready** when it is open, unassigned, and has zero open blockers.
+
+**GitHub Issues:**
 
 ```bash
 gh api repos/<owner>/<repo>/issues/<n> --jq '.issue_dependencies_summary.blocked_by'
 ```
 
-Zero means ready. Where a tracker has no native dependency edges, parse the
-"Blocked by" section and treat a blocker as cleared only once that issue is
-closed.
+Zero means ready.
+
+**Any other tracker:** use the frontier query its doc names. **Where a tracker
+computes the frontier itself, ask it rather than rebuilding one from a list** —
+a second expression of "ready" is free to drift from the board everyone else is
+looking at, silently, with every test still green. Only where a tracker has no
+native dependency edges at all should you parse a "Blocked by" section and treat
+a blocker as cleared once that issue is closed.
 
 Report the frontier before acting. If it is empty while open tickets remain,
 every one is blocked — say so and stop.
 
 ## 2. Claim
 
+**GitHub Issues:**
+
 ```bash
 gh issue edit <n> --add-assignee @me
+```
+
+**Any other tracker:** the claim operation its doc names. Prefer a conditional
+claim over an assign where one is offered: that is what stops two parallel runs
+taking the same ticket.
+
+Then, either way:
+
+```bash
 git switch -c ticket/<n>-<slug>
 ```
 
@@ -94,11 +119,19 @@ something the ticket asked for and did not get is not acceptable.
 
 ## 6. Merge and close
 
-Check the acceptance criteria in the ticket body yourself, merge, then:
+Check the acceptance criteria in the ticket body yourself, reading the body
+through whatever the tracker doc says fetches it, then merge and close with a
+comment saying what shipped.
+
+**GitHub Issues:**
 
 ```bash
 gh issue close <n> --comment "<what shipped>"
 ```
+
+**Any other tracker:** the close and comment operations its doc names. If they
+are two commands rather than one, run both: the ticket stops mattering the day
+it is done and the comment does not.
 
 ## 7. Repeat
 

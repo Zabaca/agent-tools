@@ -1,0 +1,9 @@
+{
+  "name": "branch-impact",
+  "version": "0.1.0",
+  "description": "Assess a branch or working tree against main and report outcome, impact, and risk via an independent read-only assessor that baseline-tests every risk.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["branch", "impact", "risk", "review", "subagent"],
+  "skills": "./skills/",
+  "agents": "./agents/"
+}
