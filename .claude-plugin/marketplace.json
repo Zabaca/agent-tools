@@ -137,7 +137,7 @@
     {
       "name": "stream-kit",
       "description": "Build-in-public streaming kit: configure a repo for streaming, then go live with a board-derived title, description, tags, and a restarted overlay.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./plugins/stream-kit"
     }
   ]
