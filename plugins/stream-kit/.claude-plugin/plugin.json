@@ -1,6 +1,6 @@
 {
   "name": "stream-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Build-in-public streaming kit: configure a repo for streaming, then go live with a board-derived title, description, tags, and a restarted overlay.",
   "author": { "name": "Zabaca" },
   "keywords": ["stream", "youtube", "obs", "overlay", "build-in-public"],

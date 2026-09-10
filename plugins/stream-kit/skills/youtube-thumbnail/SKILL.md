@@ -17,7 +17,7 @@ kept clear for the duration badge, 90px margins.
 ## Quick start (reference sheet already exists)
 
 ```bash
-S=~/.claude/skills/youtube-thumbnail
+S="$CLAUDE_PLUGIN_ROOT/skills/youtube-thumbnail"
 mkdir -p work && cd work
 # write the prompt first — see the template in DESIGN-RULES.md
 $S/scripts/generate.sh $S/assets/refsheet.png prompt.txt thumb-a        # flash, the default
@@ -54,7 +54,7 @@ left → centre → right, chin up, chin down, then 2s each of smug smirk, jaw-d
 and deadpan.
 
 ```bash
-S=~/.claude/skills/youtube-thumbnail
+S="$CLAUDE_PLUGIN_ROOT/skills/youtube-thumbnail"
 $S/scripts/frames.sh "~/Movies/<clip>.mov" work         # -> work/contact-sheet.png
 # Read the contact sheet, pick 6 frames: frontal, 3/4 left, 3/4 right, chin-up, smile, open-mouth
 $S/scripts/refsheet.sh work/frames $S/assets/refsheet.png 05 08 14 23 32 39
