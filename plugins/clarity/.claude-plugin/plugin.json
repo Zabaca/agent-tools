@@ -1,0 +1,9 @@
+{
+  "name": "clarity",
+  "version": "0.1.0",
+  "description": "Answer-shape skills. /problem forces a plain-language problem / impact / solution answer instead of a verbose ramble.",
+  "author": {
+    "name": "uptown"
+  },
+  "keywords": ["communication", "clarity", "plain-language", "answer-format"]
+}

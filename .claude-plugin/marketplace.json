@@ -139,6 +139,12 @@
       "description": "Build-in-public streaming kit: configure a repo for streaming, then go live with a board-derived title, description, tags, and a restarted overlay.",
       "version": "0.3.0",
       "source": "./plugins/stream-kit"
+    },
+    {
+      "name": "clarity",
+      "description": "Answer-shape skills. /problem forces a plain-language problem / impact / solution answer instead of a verbose ramble.",
+      "version": "0.1.0",
+      "source": "./plugins/clarity"
     }
   ]
 }
