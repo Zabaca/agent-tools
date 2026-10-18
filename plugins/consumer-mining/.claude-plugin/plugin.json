@@ -1,0 +1,8 @@
+{
+  "name": "consumer-mining",
+  "version": "0.1.0",
+  "description": "Mine the repos that consume your library, template or tool for what it should do next: real edits separated from stale copies of your own old code, one agent per consumer, one case per upstream surface.",
+  "author": { "name": "Zabaca" },
+  "keywords": ["consumers", "roadmap", "research", "vendoring", "subagents"],
+  "skills": "./skills/"
+}
